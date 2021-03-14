@@ -22,4 +22,4 @@ before_script:
   - echo MAVEN_OPTS=\"-Xmx2048m -Xms1024m -Djava.awt.headless=true\" > ~/.mavenrc
   - chmod +x mvnw
 
-script: mvnw test -DskipTests=false -B
+script: ./mvnw test -DskipTests=false -B
