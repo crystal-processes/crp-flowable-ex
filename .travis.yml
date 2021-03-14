@@ -17,6 +17,7 @@ notifications:
 
 before_script:
   - echo MAVEN_OPTS=\"-Xmx2048m -Xms1024m -Djava.awt.headless=true\" > ~/.mavenrc
+  - chmod +x mvnw
 
 script:
-  mvn test -DskipTests=false -B
+  - ./mvnw test -DskipTests=false -B
