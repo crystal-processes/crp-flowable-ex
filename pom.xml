@@ -11,8 +11,8 @@
   <url>https://github.com/martin-grofcik/crp-flowable-ex#crp-flowable-ex</url>
 
   <scm>
-    <connection>scm:git:http://github.com:martin-grofcik/crp-flowable-ex.git</connection>
-    <developerConnection>scm:git:http://github.com:martin-grofcik/crp-flowable-ex.git</developerConnection>
+    <connection>scm:git:github.com:martin-grofcik/crp-flowable-ex.git</connection>
+    <developerConnection>scm:git:github.com:martin-grofcik/crp-flowable-ex.git</developerConnection>
     <tag>crp-flowable-ex-0.0.1</tag>
   </scm>
 
