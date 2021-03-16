@@ -23,3 +23,10 @@ before_script:
   - chmod +x mvnw
 
 script: ./mvnw test -DskipTests=false -B
+
+deploy:
+  provider: script
+  script: "./mvnw deploy -B"
+  skip_cleanup: true
+  on:
+    tags: true
