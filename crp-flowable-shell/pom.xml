@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>crp-flowable-shell</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>flowable-shell</name>
 	<description>flowable shell application</description>
 
@@ -133,9 +133,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
-  <scm>
-    <tag>crp-flowable-ex-0.0.1</tag>
-  </scm>
 </project>
