@@ -18,12 +18,12 @@ public class UtilsTest {
 
     @Test
     void setFullConfiguration() {
-        assertThat((String) shell.evaluate(() -> "configure login password restUrl")).
-                isEqualTo("login@restUrl/");
+        assertThat((String) shell.evaluate(() -> "configure login password restUrl idmUrl")).
+                isEqualTo("login@restUrl/@idmUrl/");
         assertThat((String) shell.evaluate(() -> "configure --password password --rest-url restUrlUpdate")).
-                isEqualTo("login@restUrlUpdate/");
+                isEqualTo("login@restUrlUpdate/@restUrlUpdate/");
         assertThat((String) shell.evaluate(() -> "configure admin test http://localhost:8080/flowable-ui/app-api/")).
-                as("restore configuration").isEqualTo("admin@http://localhost:8080/flowable-ui/app-api/");
+                as("restore configuration").isEqualTo("admin@http://localhost:8080/flowable-ui/app-api/@http://localhost:8080/flowable-ui/app-api/");
     }
 
     @Test
