@@ -60,8 +60,8 @@ public class RestCommand {
     }
 
     protected boolean loginToApp(CloseableHttpClient client) throws URISyntaxException {
-        URIBuilder idmUriBuilder = new URIBuilder(configuration.getRestURL() + "app/authentication").
-                addParameter("j_username", "admin").addParameter("j_password", "test").
+        URIBuilder idmUriBuilder = new URIBuilder(configuration.getIdmURL() + "/app/authentication").
+                addParameter("j_username", configuration.getLogin()).addParameter("j_password", configuration.getPassword()).
                 addParameter("_spring_security_remember_me", "true").addParameter("submit", "Login");
         HttpPost appLogin = new HttpPost(idmUriBuilder.build());
         CloseableHttpResponse idmResponse = executeBinaryRequest(client, appLogin, false);

@@ -28,7 +28,8 @@ public class Utils {
     @ShellMethod("Configure flowable rest endpoint.")
     public String configure(@ShellOption(defaultValue = "") String login,
                             @ShellOption(defaultValue = "") String password,
-                            @ShellOption(defaultValue = "") String restUrl) {
+                            @ShellOption(defaultValue = "") String restUrl,
+                            @ShellOption(defaultValue = "") String idmUrl) {
         if (!StringUtils.isEmpty(login)) configuration.setLogin(login);
         if (!StringUtils.isEmpty(password)) configuration.setPassword(password);
         if (!StringUtils.isEmpty(restUrl)) {
@@ -37,9 +38,17 @@ public class Utils {
             }
             configuration.setRestURL(restUrl);
         }
+        if (!StringUtils.isEmpty(idmUrl)) {
+            if (!idmUrl.endsWith("/")) {
+                idmUrl += "/";
+            }
+            configuration.setIdmURL(idmUrl);
+        } else {
+            configuration.setIdmURL(configuration.getRestURL());
+        }
 
         LOGGER.info("Current configuration restUrl {}, login {}", restUrl, login);
-        return configuration.getLogin() + "@" + configuration.getRestURL();
+        return configuration.getLogin() + "@" + configuration.getRestURL() + "@" + configuration.getIdmURL();
     }
 
     @ShellMethod("Zip directory to file.")

@@ -30,7 +30,7 @@ import java.util.Map;
 @ShellCommandGroup
 @ShellComponent
 public class Model extends RestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Deployment.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Model.class);
 
     private static final Map<String, String> MODEL_TYPES = Collections.unmodifiableMap(new HashMap<String, String>() {{
         put("bpmn", "0");

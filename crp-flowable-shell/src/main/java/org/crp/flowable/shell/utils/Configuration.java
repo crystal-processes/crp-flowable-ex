@@ -4,6 +4,7 @@ public class Configuration {
     private String login;
     private String password;
     private String restURL;
+    private String idmURL;
 
     public String getRestURL() {
         return restURL;
@@ -27,5 +28,13 @@ public class Configuration {
 
     public void setLogin(String login) {
         this.login = login;
+    }
+
+    public String getIdmURL() {
+        return idmURL;
+    }
+
+    public void setIdmURL(String idmURL) {
+        this.idmURL = idmURL;
     }
 }
