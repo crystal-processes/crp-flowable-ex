@@ -4,7 +4,7 @@
     <parent>
         <artifactId>crp-flowable-ex</artifactId>
         <groupId>org.crp.flowable.ex</groupId>
-        <version>0.0.3</version>
+        <version>0.0.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>crp-flowable-groovy</artifactId>
