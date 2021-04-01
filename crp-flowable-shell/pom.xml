@@ -11,7 +11,7 @@
 
 	<groupId>org.crp.flowable.ex</groupId>
 	<artifactId>crp-flowable-shell</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>flowable-shell</name>
 	<description>flowable shell application</description>
 
@@ -140,8 +140,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-  <scm>
-    <tag>0.0.2</tag>
-  </scm>
 </project>
