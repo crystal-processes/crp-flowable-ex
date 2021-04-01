@@ -18,10 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
@@ -43,7 +40,7 @@ public class RestCommand {
     }
 
     protected JsonNode uploadFile(CloseableHttpClient client, String pathToApplication, String file, String fileName, String tenantId, HttpPost httpPost) {
-        try (FileInputStream fis = new FileInputStream(pathToApplication);
+        try (InputStream fis = getApplicationInputStream(pathToApplication);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
 
             httpPost.setEntity(
@@ -56,6 +53,15 @@ public class RestCommand {
             return responseNode;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private InputStream getApplicationInputStream(String pathToApplication) throws FileNotFoundException {
+        File appFile = new File(pathToApplication);
+        if (appFile.exists()) {
+            return new FileInputStream(pathToApplication);
+        } else {
+            return getClass().getResourceAsStream(pathToApplication);
         }
     }
 

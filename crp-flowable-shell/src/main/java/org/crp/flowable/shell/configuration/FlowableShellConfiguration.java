@@ -26,6 +26,7 @@ public class FlowableShellConfiguration {
         configuration.setLogin("admin");
         configuration.setPassword("test");
         configuration.setRestURL("http://localhost:8080/flowable-ui/");
+        configuration.setIdmURL("http://localhost:8080/flowable-ui/");
         return configuration;
     }
 
