@@ -11,9 +11,8 @@
   <url>https://github.com/martin-grofcik/crp-flowable-ex#crp-flowable-ex</url>
 
   <scm>
-    <connection>scm:git:https://github.com/martin-grofcik/crp-flowable-ex.git</connection>
-    <developerConnection>scm:git:https://github.com/martin-grofcik/crp-flowable-ex.git</developerConnection>
-    <tag>crp-flowable-ex-0.0.1</tag>
+    <connection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</connection>
+    <developerConnection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</developerConnection>
   </scm>
 
   <properties>
