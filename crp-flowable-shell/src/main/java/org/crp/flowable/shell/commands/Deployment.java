@@ -57,7 +57,7 @@ public class Deployment extends RestCommand {
     protected void deleteDeployment(CloseableHttpClient client, String deploymentId){
         try {
             LOGGER.info("Deleting deployment id {}.", deploymentId);
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getDeploymentDeploy() + deploymentId);
+            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getDeploymentDeploy() + "/" + deploymentId);
             HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
             CloseableHttpResponse response = executeBinaryRequest(client, httpDelete, false);
             try {
