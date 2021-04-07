@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <name>crp-flowable-ex</name>
-  <url>https://github.com/martin-grofcik/crp-flowable-ex#crp-flowable-ex</url>
+  <url>https://github.com/crystal-processes/crp-flowable-ex#crp-flowable-ex</url>
 
   <scm>
     <connection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</connection>

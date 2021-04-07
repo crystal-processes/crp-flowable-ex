@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.crp.flowable.shell.utils.ExecuteWithModelId;
 import org.crp.flowable.shell.utils.RestCommand;
 import org.slf4j.Logger;
@@ -40,6 +41,12 @@ public class Model extends RestCommand {
         put("cmmn", "5");
         put("decision-service", "6");
     }});
+
+    private final FlowableShellProperties properties;
+
+    public Model(FlowableShellProperties properties) {
+        this.properties = properties;
+    }
 
     @ShellMethod("Export model from modeler to file.")
     public void export(@ShellOption(defaultValue = "app") String type,
@@ -77,11 +84,11 @@ public class Model extends RestCommand {
     }
 
     protected JsonNode saveModelToFile(CloseableHttpClient client, String modelId, String outputFileName) {
-        return saveModelFromUrlToFile(client, "modeler-app/rest/app-definitions/" + modelId + "/export", outputFileName);
+        return saveModelFromUrlToFile(client, properties.getModelerAppDefinitions() + modelId + properties.getModelerExport(), outputFileName);
     }
 
     protected JsonNode saveModelToBarFile(CloseableHttpClient client, String modelId, String outputFileName) {
-        return saveModelFromUrlToFile(client, "modeler-app/rest/app-definitions/" + modelId + "/export-bar", outputFileName);
+        return saveModelFromUrlToFile(client, properties.getModelerAppDefinitions() + modelId + properties.getModelerExportBar(), outputFileName);
     }
 
     protected ObjectNode saveModelFromUrlToFile(CloseableHttpClient client, String url, String outputFileName) {
@@ -105,7 +112,7 @@ public class Model extends RestCommand {
 
     protected JsonNode deleteModel(CloseableHttpClient client, String modelId){
         try {
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + "modeler-app/rest/models/" + modelId);
+            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getModelerModels() + modelId);
             uriBuilder.addParameter("cascade", "true");
             HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
             LOGGER.info("Deleting model id {}.", modelId);
@@ -125,7 +132,7 @@ public class Model extends RestCommand {
 
     protected JsonNode importApp(CloseableHttpClient client, String pathToFile, String fileName, String tenantId){
         try {
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + "modeler-app/rest/app-definitions/import?renewIdmEntries=false");
+            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getModelerAppDefinitions() + properties.getModelerImport());
             HttpPost httpPost = new HttpPost(uriBuilder.build());
             loginToApp(client);
             return uploadFile(client, pathToFile, "file", fileName, tenantId, httpPost);
@@ -165,7 +172,7 @@ public class Model extends RestCommand {
         URIBuilder uriBuilder;
         HttpGet httpGet;
         try {
-            uriBuilder = new URIBuilder(configuration.getRestURL() + "api/editor/models").
+            uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getModelerEditorModels()).
                     addParameter("modelType", getModelType(type)).
                     addParameter("filterText", name).
                     addParameter("sort", "modifiedDesc");

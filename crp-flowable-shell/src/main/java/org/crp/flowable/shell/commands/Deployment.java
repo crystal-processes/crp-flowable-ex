@@ -7,6 +7,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.crp.flowable.shell.utils.RestCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,12 @@ import java.nio.file.Paths;
 public class Deployment extends RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(Deployment.class);
 
+    private final FlowableShellProperties properties;
+
+    public Deployment(FlowableShellProperties properties) {
+        this.properties = properties;
+    }
+
     @ShellMethod("Deploy given application")
     public JsonNode deploy(String pathToApplication,
                            @ShellOption(defaultValue = "") String deploymentName,
@@ -31,7 +38,7 @@ public class Deployment extends RestCommand {
         String mandatoryFileName = StringUtils.isEmpty(deploymentName) ? Paths.get(pathToApplication).getFileName().toString() : deploymentName;
 
         return executeWithClient(client -> {
-            HttpPost httpPost = new HttpPost(configuration.getRestURL() + "app-api/app-repository/deployments");
+            HttpPost httpPost = new HttpPost(configuration.getRestURL() + properties.getDeploymentDeploy());
             return uploadFile(client, pathToApplication, mandatoryFileName, mandatoryFileName, tenantId, httpPost);
         });
     }
@@ -50,7 +57,7 @@ public class Deployment extends RestCommand {
     protected void deleteDeployment(CloseableHttpClient client, String deploymentId){
         try {
             LOGGER.info("Deleting deployment id {}.", deploymentId);
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + "app-api/app-repository/deployments/" + deploymentId);
+            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getDeploymentDeploy() + deploymentId);
             HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
             CloseableHttpResponse response = executeBinaryRequest(client, httpDelete, false);
             try {
@@ -89,7 +96,7 @@ public class Deployment extends RestCommand {
         URIBuilder uriBuilder;
         HttpGet httpGet;
         try {
-            uriBuilder = new URIBuilder(configuration.getRestURL() + "app-api/app-repository/deployments").
+            uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getDeploymentDeploy()).
                     addParameter("sort", "deployTime").
                     addParameter("order", "desc");
             if (!StringUtils.isEmpty(name)) {
