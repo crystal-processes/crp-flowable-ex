@@ -9,7 +9,7 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>org.crp.flowable.ex</groupId>
+    <groupId>com.github.crystal-processes</groupId>
     <artifactId>crp-flowable-shell</artifactId>
     <version>0.0.4-SNAPSHOT</version>
     <name>flowable-shell</name>
