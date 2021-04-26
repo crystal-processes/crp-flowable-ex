@@ -22,12 +22,12 @@ import java.nio.file.Paths;
 
 @ShellCommandGroup
 @ShellComponent
-public class Deployment extends RestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Deployment.class);
+public class DeploymentCmd extends RestCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentCmd.class);
 
     private final FlowableShellProperties properties;
 
-    public Deployment(FlowableShellProperties properties) {
+    public DeploymentCmd(FlowableShellProperties properties) {
         this.properties = properties;
     }
 

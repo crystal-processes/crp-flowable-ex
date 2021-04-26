@@ -10,7 +10,7 @@ import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = { InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=" + false })
-public class DeploymentIT {
+public class DeploymentCmdIT {
     @Autowired
     Shell shell;
 

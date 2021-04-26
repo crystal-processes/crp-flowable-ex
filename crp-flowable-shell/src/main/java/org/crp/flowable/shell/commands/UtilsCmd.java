@@ -19,8 +19,8 @@ import java.util.zip.ZipOutputStream;
 
 @ShellCommandGroup("Utils")
 @ShellComponent
-public class Utils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+public class UtilsCmd {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UtilsCmd.class);
 
     @Autowired
     private Configuration configuration;

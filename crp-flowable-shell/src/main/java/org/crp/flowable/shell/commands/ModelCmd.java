@@ -30,8 +30,8 @@ import java.util.Map;
 
 @ShellCommandGroup
 @ShellComponent
-public class Model extends RestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Model.class);
+public class ModelCmd extends RestCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModelCmd.class);
 
     private static final Map<String, String> MODEL_TYPES = Collections.unmodifiableMap(new HashMap<String, String>() {{
         put("bpmn", "0");
@@ -44,7 +44,7 @@ public class Model extends RestCommand {
 
     private final FlowableShellProperties properties;
 
-    public Model(FlowableShellProperties properties) {
+    public ModelCmd(FlowableShellProperties properties) {
         this.properties = properties;
     }
 

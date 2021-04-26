@@ -30,6 +30,13 @@ public class FlowableShellProperties {
      */
     private String deploymentDeploy;
 
+    /**
+     * audit trail rest endpoints
+     */
+    private String auditTrailTasks;
+
+    private RuntimeProperties runtime;
+
     public String getModelerAppDefinitions() {
         return modelerAppDefinitions;
     }
@@ -84,5 +91,60 @@ public class FlowableShellProperties {
 
     public void setDeploymentDeploy(String deploymentDeploy) {
         this.deploymentDeploy = deploymentDeploy;
+    }
+
+    public String getAuditTrailTasks() {
+        return auditTrailTasks;
+    }
+
+    public void setAuditTrailTasks(String auditTrailTasks) {
+        this.auditTrailTasks = auditTrailTasks;
+    }
+
+    public RuntimeProperties getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(RuntimeProperties runtime) {
+        this.runtime = runtime;
+    }
+
+    public static class RuntimeProperties {
+        private String startProcess;
+        private String queryProcesses;
+        private String queryTasks;
+        private String taskAction;
+
+        public String getStartProcess() {
+            return startProcess;
+        }
+
+        public void setStartProcess(String startProcess) {
+            this.startProcess = startProcess;
+        }
+
+        public String getQueryProcesses() {
+            return queryProcesses;
+        }
+
+        public void setQueryProcesses(String queryProcesses) {
+            this.queryProcesses = queryProcesses;
+        }
+
+        public String getQueryTasks() {
+            return queryTasks;
+        }
+
+        public void setQueryTasks(String queryTasks) {
+            this.queryTasks = queryTasks;
+        }
+
+        public String getTaskAction() {
+            return taskAction;
+        }
+
+        public void setTaskAction(String taskAction) {
+            this.taskAction = taskAction;
+        }
     }
 }

@@ -73,7 +73,7 @@ public class RestCommand {
         CloseableHttpResponse idmResponse = executeBinaryRequest(client, appLogin, false);
         try {
             if (idmResponse.getStatusLine().getStatusCode() != HTTP_OK) {
-                LOGGER.error("Unable to establish connection to modeler app {}", idmResponse.getStatusLine());
+                LOGGER.error("Unable to establish connection to flowable app {}", idmResponse.getStatusLine());
                 return false;
             }
         } finally {
@@ -86,6 +86,22 @@ public class RestCommand {
         CloseableHttpClient client = createClient();
         try {
             return exec.execute(client);
+        } finally {
+            closeClient(client);
+        }
+    }
+
+    protected JsonNode executeWithLoggedInClient(ExecuteWithClient exec) {
+        CloseableHttpClient client = createClient();
+        try {
+            if (loginToApp(client)) {
+                return exec.execute(client);
+            } else {
+                throw new RuntimeException("Unable to login.");
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.error("Malformed URI.", e);
+            throw new RuntimeException("Malformed URI.", e);
         } finally {
             closeClient(client);
         }

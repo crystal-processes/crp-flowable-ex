@@ -11,7 +11,7 @@ import java.io.File;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = { InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=" + false })
-public class ModelIT {
+public class ModelCmdIT {
     @Autowired
     Shell shell;
 
