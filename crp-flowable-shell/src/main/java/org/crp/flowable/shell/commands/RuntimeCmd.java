@@ -49,10 +49,11 @@ public class RuntimeCmd extends RestCommand {
     }
 
     @ShellMethod(value = "List process instances", key = {"lsp", "list-processes"})
-    public JsonNode listProcesses(@ShellOption(defaultValue = "") String definitionKey) {
+    public JsonNode listProcesses(@ShellOption(defaultValue = "") String definitionKey,
+                                  @ShellOption(defaultValue = "") String instanceId) {
         return executeWithLoggedInClient(client -> {
             HttpPost httpPost = new HttpPost(configuration.getRestURL() + properties.getRuntime().getQueryProcesses());
-            httpPost.setEntity(getQueryProcessEntity(definitionKey));
+            httpPost.setEntity(getQueryProcessEntity(definitionKey, instanceId));
             try (CloseableHttpResponse closeableHttpResponse = executeBinaryRequest(client, httpPost, true)) {
                 return readContent(closeableHttpResponse);
             } catch (IOException e) {
@@ -103,10 +104,13 @@ public class RuntimeCmd extends RestCommand {
         }
     }
 
-    private HttpEntity getQueryProcessEntity(String definitionKey) {
+    private HttpEntity getQueryProcessEntity(String definitionKey, String instanceId) {
         StringBuilder sb = new StringBuilder("{");
         if (!StringUtils.isEmpty(definitionKey)) {
             sb.append("\"processDefinitionKey\":\"" + definitionKey + "\"");
+        }
+        if (!StringUtils.isEmpty(instanceId)) {
+            sb.append("\"processInstanceId\":\"" + instanceId + "\"");
         }
         sb.append("}");
         try {

@@ -39,11 +39,15 @@ class RuntimeCmdIT {
     void startProcessInstanceCompleteTask() throws JsonProcessingException {
         Map<String, Object> processInstance = objectMapper.readValue(shell.evaluate(() -> "start oneTaskProcess").toString(), Map.class);
         assertThat(processInstance).containsKey("id");
+        Map<String, Object> processes = objectMapper.readValue(shell.evaluate(() -> "lsp --instance-id " + processInstance.get("id")).toString(), Map.class);
+        assertThat(processes.get("total")).isEqualTo(1);
         Map<String, Object> task = objectMapper.readValue(shell.evaluate(() -> "lst " + processInstance.get("id")).toString(), Map.class);
         assertThat(task.get("total")).isEqualTo(1);
         String taskId = (String) ((List<Map<String, Object>>) task.get("data")).get(0).get("id");
         shell.evaluate(() -> "tsk "+ taskId +" complete ");
         task = objectMapper.readValue(shell.evaluate(() -> "lst " + processInstance.get("id")).toString(), Map.class);
         assertThat(task.get("total")).isEqualTo(0);
+        processes = objectMapper.readValue(shell.evaluate(() -> "lsp --instance-id" + processInstance.get("id")).toString(), Map.class);
+        assertThat(processes.get("total")).isEqualTo(0);
     }
 }
