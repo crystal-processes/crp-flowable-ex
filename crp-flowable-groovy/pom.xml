@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>crp-flowable-groovy</artifactId>
-    <name>flowable-groovy</name>
+    <name>crp-flowable-groovy</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

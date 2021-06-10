@@ -12,7 +12,7 @@
     <groupId>com.github.crystal-processes</groupId>
     <artifactId>crp-flowable-shell</artifactId>
     <version>0.0.4-SNAPSHOT</version>
-    <name>flowable-shell</name>
+    <name>crp-flowable-shell</name>
     <description>flowable shell application</description>
 
     <properties>
