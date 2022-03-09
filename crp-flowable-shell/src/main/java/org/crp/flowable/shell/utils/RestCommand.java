@@ -2,6 +2,8 @@ package org.crp.flowable.shell.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
+
 import org.apache.http.HttpHeaders;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -99,6 +101,23 @@ public class RestCommand {
         }
     }
 
+    protected JsonNode executeWithLoggedInClient(ExecuteWithClient exec) {
+        CloseableHttpClient client = createClient();
+        try {
+            if (loginToApp(client)) {
+                return exec.execute(client);
+            } else {
+                LOGGER.error("Unable to login.");
+                throw new RuntimeException("Unable to login");
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.error("Login failed.", e);
+            throw new RuntimeException(e);
+        } finally {
+            closeClient(client);
+        }
+    }
+
     protected CloseableHttpResponse executeBinaryRequest(CloseableHttpClient client, HttpUriRequest request, boolean addJsonContentType) {
         try {
             if (addJsonContentType && request.getFirstHeader(HttpHeaders.CONTENT_TYPE) == null) {
@@ -112,10 +131,17 @@ public class RestCommand {
     }
 
     protected JsonNode readContent(CloseableHttpResponse response) {
-        try {
-            return objectMapper.readTree(response.getEntity().getContent());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        if (response.getStatusLine().getStatusCode() < 300 && response.getStatusLine().getStatusCode() >199) {
+            try {
+                if (response.getEntity() != null) {
+                    return objectMapper.readTree(response.getEntity().getContent());
+                }
+                return objectMapper.createObjectNode();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            throw new RuntimeException("The response is not correct " + response.getStatusLine());
         }
     }
 
