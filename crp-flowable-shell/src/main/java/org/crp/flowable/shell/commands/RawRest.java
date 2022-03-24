@@ -1,6 +1,8 @@
 package org.crp.flowable.shell.commands;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -38,8 +40,12 @@ public class RawRest extends RestCommand {
         return executeWithLoggedInClient(client -> {
             try {
                 HttpUriRequest httpUriRequest = createHttpUriRequest(url, method, body);
-                CloseableHttpResponse closeableHttpResponse = executeBinaryRequest(client, httpUriRequest, true);
-                return readContent(closeableHttpResponse);
+                try (CloseableHttpResponse closeableHttpResponse = executeBinaryRequest(client, httpUriRequest, true)) {
+                    return readContent(closeableHttpResponse);
+                } catch (IOException e) {
+                    LOGGER.error("Unable to execute request", e);
+                    throw new RuntimeException(e);
+                }
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -52,8 +58,12 @@ public class RawRest extends RestCommand {
         return executeWithClient(client -> {
             try {
                 HttpUriRequest httpUriRequest = createHttpUriRequest(url, method, body);
-                CloseableHttpResponse closeableHttpResponse = executeBinaryRequest(client, httpUriRequest, true);
-                return readContent(closeableHttpResponse);
+                try (CloseableHttpResponse closeableHttpResponse = executeBinaryRequest(client, httpUriRequest, true)) {
+                    return readContent(closeableHttpResponse);
+                } catch (IOException e) {
+                    LOGGER.error("Unable to execute request", e);
+                    throw new RuntimeException(e);
+                }
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -64,26 +74,24 @@ public class RawRest extends RestCommand {
 
         switch (method) {
             case GET :
-                HttpGet httpGet = new HttpGet(configuration.getRestURL() + url);
-                return httpGet;
+                return new HttpGet(shellProperties.getRestURL() + url);
             case DELETE :
-                HttpDelete httpDelete = new HttpDelete(configuration.getRestURL() + url);
-                return httpDelete;
+                return new HttpDelete(shellProperties.getRestURL() + url);
             case POST :
-                HttpPost httpPost = new HttpPost(configuration.getRestURL() + url);
+                HttpPost httpPost = new HttpPost(shellProperties.getRestURL() + url);
                 if (StringUtils.hasText(body)) {
                     httpPost.setEntity(new StringEntity(body));
                 }
                 return httpPost;
             case PUT :
-                HttpPut httpPut = new HttpPut(configuration.getRestURL() + url);
+                HttpPut httpPut = new HttpPut(shellProperties.getRestURL() + url);
                 if (StringUtils.hasText(body)) {
                     httpPut.setEntity(new StringEntity(body));
                 }
                 return httpPut;
             default :
                 LOGGER.error("");
-                throw new RuntimeException("Unsupported method " + method + ", allowed method are " + RequestMethod.values());
+                throw new RuntimeException("Unsupported method " + method + ", allowed method are " + Arrays.toString(RequestMethod.values()));
         }
     }
 
