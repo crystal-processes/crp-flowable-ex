@@ -4,7 +4,7 @@
     <parent>
         <artifactId>crp-flowable-ex</artifactId>
         <groupId>io.github.crystal-processes</groupId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.4</version>
     </parent>
 
     <artifactId>crp-flowable-groovy</artifactId>

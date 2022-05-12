@@ -5,12 +5,12 @@
     <parent>
         <groupId>io.github.crystal-processes</groupId>
         <artifactId>crp-flowable-ex</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.4</version>
     </parent>
 
     <groupId>io.github.crystal-processes</groupId>
     <artifactId>crp-flowable-shell</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.4</version>
     <name>crp-flowable-shell</name>
     <description>flowable shell application</description>
 
