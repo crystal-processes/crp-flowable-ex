@@ -22,7 +22,7 @@ before_script:
   - echo MAVEN_OPTS=\"-Xmx2048m -Xms1024m -Djava.awt.headless=true\" > ~/.mavenrc
   - chmod +x mvnw
 
-script: ./mvnw verify -DskipTests=false -Pdocker -B
+script: ./mvnw verify -DskipTests=false -Pintegration-test -B
 
 deploy:
   provider: script

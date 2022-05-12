@@ -1,0 +1,14 @@
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theStart|7|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theStart|7|TakeOutgoingSequenceFlowsOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|flow1|8|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|task|9|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theStart|7|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theStart|7|TakeOutgoingSequenceFlowsOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|flow1|8|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|task|9|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|task|9|TriggerExecutionOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|task|9|TakeOutgoingSequenceFlowsOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|flow2|11|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theEnd|12|ContinueProcessOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theEnd|12|TakeOutgoingSequenceFlowsOperation|
+|org/crp/flowable/test/oneTaskProcess.bpmn20.xml|oneTaskProcess|theEnd|12|EndExecutionOperation|

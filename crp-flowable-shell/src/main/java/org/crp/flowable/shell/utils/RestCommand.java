@@ -2,7 +2,6 @@ package org.crp.flowable.shell.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.auth.AuthScope;
@@ -16,6 +15,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
+import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +30,13 @@ public class RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestCommand.class);
 
     @Autowired
-    protected Configuration configuration;
+    protected FlowableShellProperties shellProperties;
     @Autowired
     protected ObjectMapper objectMapper;
 
     protected CloseableHttpClient createClient() {
         CredentialsProvider provider = new BasicCredentialsProvider();
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(configuration.getLogin(), configuration.getPassword());
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(shellProperties.getLogin(), shellProperties.getPassword());
         provider.setCredentials(AuthScope.ANY, credentials);
         return HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
     }
@@ -48,11 +48,12 @@ public class RestCommand {
             httpPost.setEntity(
                     HttpMultipartHelper.getMultiPartEntity(file, fileName, "application/zip", bis, Collections.singletonMap("tenantId", tenantId)));
             LOGGER.info("Calling flowable rest api {} to deploy {} into tenantId {}", httpPost.getURI().toString(), pathToApplication, tenantId);
-            CloseableHttpResponse response = executeBinaryRequest(client, httpPost, false);
-
-            JsonNode responseNode = readContent(response);
-            closeResponse(response);
-            return responseNode;
+            try (CloseableHttpResponse closeableHttpResponse = executeBinaryRequest(client, httpPost, false)) {
+                return readContent(closeableHttpResponse);
+            } catch (IOException e) {
+                LOGGER.error("Unable to execute request", e);
+                throw new RuntimeException(e);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -68,20 +69,21 @@ public class RestCommand {
     }
 
     protected boolean loginToApp(CloseableHttpClient client) throws URISyntaxException {
-        URIBuilder idmUriBuilder = new URIBuilder(configuration.getIdmURL() + "/app/authentication").
-                addParameter("j_username", configuration.getLogin()).addParameter("j_password", configuration.getPassword()).
+        URIBuilder idmUriBuilder = new URIBuilder(shellProperties.getIdmURL() + "/app/authentication").
+                addParameter("j_username", shellProperties.getLogin()).addParameter("j_password", shellProperties.getPassword()).
                 addParameter("_spring_security_remember_me", "true").addParameter("submit", "Login");
         HttpPost appLogin = new HttpPost(idmUriBuilder.build());
-        CloseableHttpResponse idmResponse = executeBinaryRequest(client, appLogin, false);
-        try {
+        try (CloseableHttpResponse idmResponse = executeBinaryRequest(client, appLogin, false)) {
             if (idmResponse.getStatusLine().getStatusCode() != HTTP_OK) {
                 LOGGER.error("Unable to establish connection to modeler app {}", idmResponse.getStatusLine());
                 return false;
+            } else {
+                return true;
             }
-        } finally {
-            closeResponse(idmResponse);
+        } catch (IOException e) {
+            LOGGER.error("unable to establish connection to modeler", e);
+            throw new RuntimeException(e);
         }
-        return true;
     }
 
     protected JsonNode executeWithClient(ExecuteWithClient exec) {

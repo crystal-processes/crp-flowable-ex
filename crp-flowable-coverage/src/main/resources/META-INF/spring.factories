@@ -1,0 +1,4 @@
+# BPM Flowable process test coverage auto-configurations
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    org.crp.flowable.coverage.bpmn.BpmnCoverageAutoConfiguration

@@ -17,6 +17,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
@@ -38,7 +39,7 @@ public class Deployment extends RestCommand {
         String mandatoryFileName = StringUtils.isEmpty(deploymentName) ? Paths.get(pathToApplication).getFileName().toString() : deploymentName;
 
         return executeWithClient(client -> {
-            HttpPost httpPost = new HttpPost(configuration.getRestURL() + properties.getDeploymentDeploy());
+            HttpPost httpPost = new HttpPost(shellProperties.getRestURL() + properties.getDeploymentDeploy());
             return uploadFile(client, pathToApplication, mandatoryFileName, mandatoryFileName, tenantId, httpPost);
         });
     }
@@ -57,13 +58,12 @@ public class Deployment extends RestCommand {
     protected void deleteDeployment(CloseableHttpClient client, String deploymentId){
         try {
             LOGGER.info("Deleting deployment id {}.", deploymentId);
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getDeploymentDeploy() + "/" + deploymentId);
+            URIBuilder uriBuilder = new URIBuilder(shellProperties.getRestURL() + properties.getDeploymentDeploy() + "/" + deploymentId);
             HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
-            CloseableHttpResponse response = executeBinaryRequest(client, httpDelete, false);
-            try {
+            try (CloseableHttpResponse response = executeBinaryRequest(client, httpDelete, false)) {
                 LOGGER.info("Delete response {}", response.getStatusLine());
-            } finally {
-                closeResponse(response);
+            } catch (IOException e) {
+                LOGGER.error("Unable to deleteDeployment.", e);
             }
         } catch (URISyntaxException e) {
             LOGGER.error("Unable to deleteDeployment.", e);
@@ -96,7 +96,7 @@ public class Deployment extends RestCommand {
         URIBuilder uriBuilder;
         HttpGet httpGet;
         try {
-            uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getDeploymentDeploy()).
+            uriBuilder = new URIBuilder(shellProperties.getRestURL() + properties.getDeploymentDeploy()).
                     addParameter("sort", "deployTime").
                     addParameter("order", "desc");
             if (!StringUtils.isEmpty(name)) {
@@ -111,11 +111,12 @@ public class Deployment extends RestCommand {
         }
 
         LOGGER.info("Calling flowable rest api {} to get deployments", httpGet.getURI().toString());
-        CloseableHttpResponse response = executeBinaryRequest(client, httpGet, true);
-
-        JsonNode responseNode = readContent(response);
-        closeResponse(response);
-        return responseNode;
+        try (CloseableHttpResponse response = executeBinaryRequest(client, httpGet, true)) {
+            return readContent(response);
+        } catch (IOException e) {
+            LOGGER.error("Unable get deployments", e);
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -25,7 +25,5 @@ hs_err_pid*
 *.iml
 *.ipr
 *.iws
-/crp-flowable-spock/target/
-/crp-flowable-groovy/target/
-/crp-flowable-shell/target/
+/*/target/
 /.idea/

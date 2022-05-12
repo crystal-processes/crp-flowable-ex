@@ -1,7 +1,7 @@
 package org.crp.flowable.shell.commands;
 
 import org.apache.commons.io.IOUtils;
-import org.crp.flowable.shell.utils.Configuration;
+import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
     @Autowired
-    private Configuration configuration;
+    private FlowableShellProperties configuration;
 
     @ShellMethod("Configure flowable rest endpoint.")
     public String configure(@ShellOption(defaultValue = "") String login,

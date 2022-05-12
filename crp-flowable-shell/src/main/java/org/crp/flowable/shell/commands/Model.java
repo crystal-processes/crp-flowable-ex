@@ -93,16 +93,12 @@ public class Model extends RestCommand {
 
     protected ObjectNode saveModelFromUrlToFile(CloseableHttpClient client, String url, String outputFileName) {
         try {
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + url);
+            URIBuilder uriBuilder = new URIBuilder(shellProperties.getRestURL() + url);
             HttpGet httpGet = new HttpGet(uriBuilder.build());
             LOGGER.info("Getting model from url {} to file {}.", uriBuilder.getPath(), outputFileName);
-            CloseableHttpResponse response = executeBinaryRequest(client, httpGet, false);
-
-            try {
+            try (CloseableHttpResponse response = executeBinaryRequest(client, httpGet, false)) {
                 InputStream content = response.getEntity().getContent();
                 FileUtils.copyInputStreamToFile(content, new File(outputFileName));
-            } finally {
-                closeResponse(response);
             }
         } catch (IOException | URISyntaxException e) {
             LOGGER.error("Unable to save file.", e);
@@ -112,19 +108,16 @@ public class Model extends RestCommand {
 
     protected JsonNode deleteModel(CloseableHttpClient client, String modelId){
         try {
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getModelerModels() + modelId);
+            URIBuilder uriBuilder = new URIBuilder(shellProperties.getRestURL() + properties.getModelerModels() + modelId);
             uriBuilder.addParameter("cascade", "true");
             HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
             LOGGER.info("Deleting model id {}.", modelId);
-            CloseableHttpResponse response = executeBinaryRequest(client, httpDelete, false);
-            JsonNode responseNode = readContent(response);
-            try {
+            try (CloseableHttpResponse response = executeBinaryRequest(client, httpDelete, false)) {
+                JsonNode responseNode = readContent(response);
                 LOGGER.info("Delete response {}", response.getStatusLine());
-            } finally {
-                closeResponse(response);
+                return responseNode;
             }
-            return responseNode;
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             LOGGER.error("Unable to deleteModel.", e);
         }
         return null;
@@ -132,7 +125,7 @@ public class Model extends RestCommand {
 
     protected JsonNode importApp(CloseableHttpClient client, String pathToFile, String fileName, String tenantId){
         try {
-            URIBuilder uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getModelerAppDefinitions() + properties.getModelerImport());
+            URIBuilder uriBuilder = new URIBuilder(shellProperties.getRestURL() + properties.getModelerAppDefinitions() + properties.getModelerImport());
             HttpPost httpPost = new HttpPost(uriBuilder.build());
             loginToApp(client);
             return uploadFile(client, pathToFile, "file", fileName, tenantId, httpPost);
@@ -172,7 +165,7 @@ public class Model extends RestCommand {
         URIBuilder uriBuilder;
         HttpGet httpGet;
         try {
-            uriBuilder = new URIBuilder(configuration.getRestURL() + properties.getModelerEditorModels()).
+            uriBuilder = new URIBuilder(shellProperties.getRestURL() + properties.getModelerEditorModels()).
                     addParameter("modelType", getModelType(type)).
                     addParameter("filterText", name).
                     addParameter("sort", "modifiedDesc");
@@ -182,11 +175,12 @@ public class Model extends RestCommand {
         }
 
         LOGGER.info("Calling flowable rest api {} to get models", httpGet.getURI().toString());
-        CloseableHttpResponse response = executeBinaryRequest(client, httpGet, true);
-
-        JsonNode responseNode = readContent(response);
-        closeResponse(response);
-        return responseNode;
+        try (CloseableHttpResponse response = executeBinaryRequest(client, httpGet, true)) {
+            return readContent(response);
+        } catch (IOException e) {
+            LOGGER.error("Unable to get models", e);
+            throw new RuntimeException("Unable to get models", e);
+        }
     }
 
     protected String getModelType(String type) {
