@@ -25,8 +25,8 @@ class ProcessModelBuilder {
 
         if (flowElements) {
             process.addFlowElement(flowElements[0])
-            if (flowElements.size > 1) {
-                (1..<flowElements.size).each {
+            if (flowElements.size() > 1) {
+                (1..<flowElements.size()).each {
                     def sourceRef = flowElements[it - 1].id
                     def targetRef = flowElements[it].id
                     process.addFlowElement(new SequenceFlow(sourceRef: sourceRef, targetRef: targetRef))

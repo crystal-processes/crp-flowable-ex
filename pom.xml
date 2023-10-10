@@ -33,13 +33,15 @@
   <properties>
     <project.scm.id>github-server</project.scm.id>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <java.version>1.8</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <java.version>17</java.version>
 
-    <flowable.version>6.7.2</flowable.version>
-    <groovy.version>3.0.0</groovy.version>
-    <junit.jupiter.version>5.7.0</junit.jupiter.version>
+    <flowable.version>7.0.0</flowable.version>
+    <spring.boot.version>3.0.5</spring.boot.version>
+    <groovy.version>3.0.19</groovy.version>
+    <junit.jupiter.version>5.10.0</junit.jupiter.version>
+    <junit.platform.version>1.10.0</junit.platform.version>
     <hikari.version>3.4.2</hikari.version>
     <slf4j.version>1.7.30</slf4j.version>
   </properties>
@@ -48,7 +50,7 @@
     <!-- test -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
+      <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
       <version>${junit.jupiter.version}</version>
     </dependency>
@@ -166,27 +168,39 @@
             <autoReleaseAfterClose>true</autoReleaseAfterClose>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>3.0.1</version>
-          <executions>
-            <execution>
-              <id>sign-artifacts</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>sign</goal>
-              </goals>
-              <configuration>
-                <keyname>${gpg.keyname}</keyname>
-                <passphraseServerId>${gpg.keyname}</passphraseServerId>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>ci/cd</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-gpg-plugin</artifactId>
+              <version>3.0.1</version>
+              <executions>
+                <execution>
+                  <id>sign-artifacts</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                  <configuration>
+                    <keyname>${gpg.keyname}</keyname>
+                    <passphraseServerId>${gpg.keyname}</passphraseServerId>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
 
   <modules>
     <module>crp-flowable-spock</module>
