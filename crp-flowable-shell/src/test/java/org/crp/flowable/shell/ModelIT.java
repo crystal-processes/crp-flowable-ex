@@ -1,29 +1,25 @@
 package org.crp.flowable.shell;
 
+import org.crp.flowable.shell.commands.Model;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.shell.Shell;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = { InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=" + false })
-public class ModelIT {
-    @Autowired
-    Shell shell;
+@ContextConfiguration(classes=Model.class)
+public class ModelIT extends AbstractCommandTest {
 
     @Test
     void importExportApp() {
         File outFile = new File("target/outputFile.zip");
         try {
-            shell.evaluate(() -> "import --input-file-name src/test/resources/app.zip");
+            execute("import --input-file-name src/test/resources/app.zip");
+            execute("list app");
+            assertScreenContainsText("\"name\" : \"oneTaskProcess\"");
 
-            assertThat(shell.evaluate(() -> "list app").toString()).contains("\"name\":\"app\"");
-
-            shell.evaluate(() -> "export --name app --output-file-name target/outputFile.zip");
+            execute("export --name app --output-file-name target/outputFile.zip");
 
             assertThat(outFile).exists();
         } finally {
@@ -32,13 +28,13 @@ public class ModelIT {
                     System.err.println("Unable to delete file");
                 }
             }
-            shell.evaluate(() -> "rm app");
-            assertThat(shell.evaluate(() -> "ls app").toString()).
-                    contains("\"size\":0");
+            execute("rm app");
+            execute("ls app");
+            assertScreenNotContainsText("\"size\" : 0", "Error");
 
-            shell.evaluate(() -> "rm oneTaskProcess bpmn");
-            assertThat(shell.evaluate(() -> "ls oneTaskProcess bpmn").toString()).
-                    contains("\"size\":0");
+            execute("rm oneTaskProcess bpmn");
+            execute("ls oneTaskProcess bpmn");
+            assertScreenContainsText("\"size\" : 0");
 
         }
     }

@@ -33,9 +33,9 @@ public class Deployment extends RestCommand {
     }
 
     @ShellMethod("Deploy given application")
-    public JsonNode deploy(String pathToApplication,
-                           @ShellOption(defaultValue = "") String deploymentName,
-                           @ShellOption(defaultValue = "") String tenantId) {
+    public JsonNode deploy(@ShellOption(value= "path-to-application", optOut = true) String pathToApplication,
+                           @ShellOption(value= "deployment-name", defaultValue = "") String deploymentName,
+                           @ShellOption(value= "tenant-id", defaultValue = "") String tenantId) {
         String mandatoryFileName = StringUtils.isEmpty(deploymentName) ? Paths.get(pathToApplication).getFileName().toString() : deploymentName;
 
         return executeWithClient(client -> {

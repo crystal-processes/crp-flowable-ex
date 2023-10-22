@@ -51,30 +51,30 @@ public class Model extends RestCommand {
     @ShellMethod("Export model from modeler to file.")
     public void export(@ShellOption(defaultValue = "app") String type,
                        @ShellOption String name,
-                       @ShellOption(defaultValue = "") String tenantId,
-                       @ShellOption String outputFileName) {
+                       @ShellOption(value="tenant-id", defaultValue = "") String tenantId,
+                       @ShellOption(value="output-file-name") String outputFileName) {
         executeWithModelId(type, name, (client, modelId) -> saveModelToFile(client, modelId, outputFileName));
     }
 
     @ShellMethod("Export deployable model from modeler to file.")
     public void exportBar(@ShellOption(defaultValue = "app") String type,
                        @ShellOption String name,
-                       @ShellOption(defaultValue = "") String tenantId,
-                       @ShellOption String outputFileName) {
+                       @ShellOption(value="tenant-id", defaultValue = "") String tenantId,
+                       @ShellOption(value="output-file-name") String outputFileName) {
         executeWithModelId(type, name, (client, modelId) -> saveModelToBarFile(client, modelId, outputFileName));
     }
 
     @ShellMethod(value = "Delete model from modeler.", key = {"rm", "delete-model"})
     public JsonNode deleteModel(String name,
                             @ShellOption(defaultValue = "app") String type,
-                            @ShellOption(defaultValue = "") String tenantId) {
+                            @ShellOption(value="tenant-id", defaultValue = "") String tenantId) {
         return executeWithModelId(type, name, this::deleteModel);
     }
 
 
     @ShellMethod(value="Import file to modeler.", key="import")
-    public JsonNode importToModeler(String inputFileName,
-                                @ShellOption(defaultValue = "") String tenantId) {
+    public JsonNode importToModeler(@ShellOption(value="input-file-name", optOut = true) String inputFileName,
+                                @ShellOption(value="tenant-id", defaultValue = "") String tenantId) {
         return executeWithClient(client -> importApp(client, inputFileName, Paths.get(inputFileName).getFileName().toString(), tenantId));
     }
 

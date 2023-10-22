@@ -38,7 +38,7 @@
     <java.version>17</java.version>
 
     <flowable.version>7.0.0</flowable.version>
-    <spring.boot.version>3.0.5</spring.boot.version>
+    <spring.boot.version>3.1.5</spring.boot.version>
     <groovy.version>3.0.19</groovy.version>
     <junit.jupiter.version>5.10.0</junit.jupiter.version>
     <junit.platform.version>1.10.0</junit.platform.version>
@@ -120,7 +120,12 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.11.0</version>
+          <configuration>
+            <compilerArgs>
+              <arg>-parameters</arg>
+            </compilerArgs>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>

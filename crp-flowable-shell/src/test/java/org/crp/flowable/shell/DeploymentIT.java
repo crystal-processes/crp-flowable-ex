@@ -1,54 +1,55 @@
 package org.crp.flowable.shell;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import org.crp.flowable.shell.commands.Deployment;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.shell.ParameterMissingResolutionException;
-import org.springframework.shell.Shell;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootTest(properties = { InteractiveShellApplicationRunner.SPRING_SHELL_INTERACTIVE_ENABLED + "=" + false })
-public class DeploymentIT {
-    @Autowired
-    Shell shell;
+@ContextConfiguration(classes={Deployment.class})
+public class DeploymentIT extends AbstractCommandTest {
 
     @Test
     void deploy() {
-        assertThat(shell.evaluate(() -> "deploy src/test/resources/app.bar").toString()).
-                contains("\"name\":\"app\"");
-        assertThat(shell.evaluate(() -> "lsd app").toString()).
-                contains("\"size\":1");
-
-        deleteDeployment("app");
+        try {
+            execute("deploy src/test/resources/app.bar");
+            execute("lsd app");
+            assertScreenContainsText("\"size\" : 1");
+        } finally {
+            deleteDeployment("app");
+        }
     }
+
 
     @Test
     void deployWithAppName() {
-        assertThat(shell.evaluate(() -> "deploy src/test/resources/app.bar --deployment-name testFileName.bar").toString()).
-                contains("\"name\":\"testFileName\"");
-
-        deleteDeployment("testFileName");
+        try {
+            execute("deploy src/test/resources/app.bar --deployment-name testFileName.bar");
+            execute("lsd testFileName");
+            assertScreenContainsText("\"size\" : 1");
+        } finally {
+            deleteDeployment("testFileName");
+        }
     }
 
     @Test
     void deployWithTenant() {
-        assertThat(shell.evaluate(() -> "deploy src/test/resources/app.bar --deployment-name app.bar --tenant-id testTenant").toString()).
-                contains("\"tenantId\":\"testTenant\"");
-
-        deleteDeployment("app");
+        try {
+            execute("deploy src/test/resources/app.bar --deployment-name app.bar --tenant-id testTenant");
+            execute( "lsd app");
+            assertScreenContainsText("\"tenantId\" : \"testTenant\"");
+        } finally {
+            deleteDeployment( "app");
+        }
     }
 
     @Test
     void deployWithoutFileName() {
-        assertThat((ParameterMissingResolutionException) shell.evaluate(() -> "deploy")).
-                extracting(Throwable::getMessage).isEqualTo("Parameter '--path-to-application string' should be specified");
+        execute("deploy");
+        assertScreenContainsText("Missing mandatory option '--path-to-application'");
     }
 
     private void deleteDeployment(String deploymentName) {
-        shell.evaluate(() -> "delete-deployments " + deploymentName);
-        assertThat(shell.evaluate(() -> "lsd "+ deploymentName).toString()).
-                contains("\"size\":0");
+        execute("delete-deployments " + deploymentName);
+        execute("lsd "+ deploymentName);
+        assertScreenContainsText("\"size\" : 0");
     }
 }

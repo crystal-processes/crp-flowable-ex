@@ -40,6 +40,9 @@ public class FlowableShellProperties {
      */
     private String deploymentDeploy;
 
+    private String designerURL;
+    private String token;
+
     public String getModelerAppDefinitions() {
         return modelerAppDefinitions;
     }
@@ -150,5 +153,21 @@ public class FlowableShellProperties {
 
     public void setSourceTestJavaDir(String sourceTestJavaDir) {
         this.sourceTestJavaDir = sourceTestJavaDir;
+    }
+
+    public String getDesignerURL() {
+        return designerURL;
+    }
+
+    public void setDesignerURL(String designerURL) {
+        this.designerURL = designerURL;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
