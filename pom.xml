@@ -43,7 +43,7 @@
     <junit.jupiter.version>5.10.0</junit.jupiter.version>
     <junit.platform.version>1.10.0</junit.platform.version>
     <hikari.version>3.4.2</hikari.version>
-    <slf4j.version>1.7.30</slf4j.version>
+    <slf4j.version>2.0.7</slf4j.version>
   </properties>
 
   <dependencies>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.30</version>
+      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -33,7 +33,7 @@ import java.util.Map;
 public class Model extends RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(Model.class);
 
-    private static final Map<String, String> MODEL_TYPES = Collections.unmodifiableMap(new HashMap<String, String>() {{
+    private static final Map<String, String> MODEL_TYPES = Collections.unmodifiableMap(new HashMap<>() {{
         put("bpmn", "0");
         put("form", "2");
         put("app", "3");

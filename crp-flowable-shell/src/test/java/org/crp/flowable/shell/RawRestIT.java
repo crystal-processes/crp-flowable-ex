@@ -5,12 +5,10 @@ import org.crp.flowable.shell.commands.RawRest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
-
 @ContextConfiguration(classes= {Deployment.class, RawRest.class})
 public class RawRestIT extends AbstractCommandTest {
     @Test
-    void deployModel() throws IOException {
+    void deployModel() {
         // given: deploy app
         execute("deploy src/test/resources/app.bar --deployment-name testFileName.bar");
         assertScreenContainsText("\"name\" : \"testFileName\"");
