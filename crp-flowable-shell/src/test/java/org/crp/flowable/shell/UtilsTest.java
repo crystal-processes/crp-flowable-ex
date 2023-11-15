@@ -17,7 +17,9 @@ public class UtilsTest extends AbstractCommandTest {
         assertScreenContainsText("login@restUrl/@idmUrl/");
         execute("configure --password password --rest-url restUrlUpdate");
         assertScreenContainsText("login@restUrl/@idmUrl/");
-        execute("configure admin test http://localhost:8080/flowable-ui/app-api/");
+        execute("configure --designerUrl https://cloud.flowable.com/design/design-api");
+        assertScreenContainsText("https://cloud.flowable.com/design/design-api");
+        execute("configure admin test http://localhost:8080/flowable-ui/app-api/ --designerUrl https://cloud.flowable.com/design/design-api");
         assertScreenContainsText("admin@http://localhost:8080/flowable-ui/app-api");
     }
 

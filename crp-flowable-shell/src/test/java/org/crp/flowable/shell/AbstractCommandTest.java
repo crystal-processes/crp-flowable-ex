@@ -38,7 +38,8 @@ public class AbstractCommandTest {
     }
 
     protected void assertScreenContainsText(String text) {
-        await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> ShellAssertions.assertThat(session.screen()).containsText(text));
+        await().atMost(10, TimeUnit.SECONDS).untilAsserted(() ->
+                ShellAssertions.assertThat(session.screen()).containsText(text));
     }
 
     protected void execute(String command) {

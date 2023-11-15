@@ -28,7 +28,7 @@ public class FlowableShellConfiguration {
 
     @Bean
     public PromptProvider flowableShellPromptProvider() {
-        return () -> new AttributedString("flowable-shell:>", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+        return () -> new AttributedString("crp-flowable-shell:>", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
     }
 
 }

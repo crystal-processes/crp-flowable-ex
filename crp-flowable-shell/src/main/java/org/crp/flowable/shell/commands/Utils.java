@@ -29,7 +29,8 @@ public class Utils {
     public String configure(@ShellOption(defaultValue = "") String login,
                             @ShellOption(defaultValue = "") String password,
                             @ShellOption(defaultValue = "") String restUrl,
-                            @ShellOption(defaultValue = "") String idmUrl) {
+                            @ShellOption(defaultValue = "") String idmUrl,
+                            @ShellOption(defaultValue = "") String designerUrl) {
         if (!StringUtils.isEmpty(login)) configuration.setLogin(login);
         if (!StringUtils.isEmpty(password)) configuration.setPassword(password);
         if (!StringUtils.isEmpty(restUrl)) {
@@ -47,8 +48,15 @@ public class Utils {
             configuration.setIdmURL(configuration.getRestURL());
         }
 
-        LOGGER.info("Current configuration restUrl {}, login {}", restUrl, login);
-        return configuration.getLogin() + "@" + configuration.getRestURL() + "@" + configuration.getIdmURL();
+        if (!StringUtils.isEmpty(designerUrl)) {
+            if (!designerUrl.endsWith("/")) {
+                designerUrl += "/";
+            }
+            configuration.setDesignerURL(designerUrl);
+        }
+
+        LOGGER.info("Current configuration designer Url {}, restUrl {}, login {}", designerUrl, restUrl, login);
+        return configuration.getLogin() + "@" + configuration.getRestURL() + "@" + configuration.getIdmURL() + "@"+configuration.getDesignerURL();
     }
 
     @ShellMethod("Zip directory to file.")
