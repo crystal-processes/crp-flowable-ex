@@ -39,11 +39,12 @@
 
     <flowable.version>7.0.0</flowable.version>
     <spring.boot.version>3.1.5</spring.boot.version>
-    <groovy.version>3.0.19</groovy.version>
+    <groovy.version>4.0.15</groovy.version>
     <junit.jupiter.version>5.10.0</junit.jupiter.version>
     <junit.platform.version>1.10.0</junit.platform.version>
     <hikari.version>3.4.2</hikari.version>
     <slf4j.version>2.0.7</slf4j.version>
+    <assertj.version>3.24.2</assertj.version>
   </properties>
 
   <dependencies>
@@ -75,7 +76,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.14.0</version>
+      <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -217,5 +218,6 @@
     <module>crp-flowable-shell</module>
     <module>crp-flowable-coverage</module>
     <module>crp-bpm-sonarqube-plugin</module>
+    <module>crp-flowable-assert</module>
   </modules>
 </project>
