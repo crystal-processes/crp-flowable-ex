@@ -1,9 +1,6 @@
 package org.crp.flowable.assertions;
 
-import org.flowable.engine.HistoryService;
-import org.flowable.engine.ProcessEngine;
-import org.flowable.engine.ProcessEngines;
-import org.flowable.engine.RuntimeService;
+import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 
@@ -19,6 +16,10 @@ public class Utils {
 
     protected static String getProcessDescription(String processDefinitionKey, String id) {
         return "Expected process instance <"+processDefinitionKey+", "+id+">";
+    }
+
+    protected static TaskService getTaskService() {
+        return getProcessEngine().getTaskService();
     }
 
     protected static RuntimeService getRuntimeService() {

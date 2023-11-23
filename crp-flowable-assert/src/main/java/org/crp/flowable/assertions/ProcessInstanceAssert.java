@@ -2,8 +2,14 @@ package org.crp.flowable.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.ListAssert;
+import org.assertj.core.api.ObjectAssert;
 import org.flowable.engine.runtime.ActivityInstance;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.eventsubscription.api.EventSubscription;
+import org.flowable.identitylink.api.IdentityLink;
+import org.flowable.task.api.Task;
+import org.flowable.variable.api.persistence.entity.VariableInstance;
 
 import static org.crp.flowable.assertions.CrpFlowableAssertions.assertThat;
 import static org.crp.flowable.assertions.Utils.*;
@@ -89,6 +95,45 @@ public class ProcessInstanceAssert extends AbstractAssert<ProcessInstanceAssert,
         isNotNull();
 
         return assertThat(getRuntimeService().createActivityInstanceQuery().processInstanceId(actual.getId()).orderByActivityInstanceStartTime().asc().list());
+    }
+
+    public ListAssert<Execution> executions() {
+        isNotNull();
+
+        return assertThat(getRuntimeService().createExecutionQuery().processInstanceId(actual.getId()).list());
+    }
+
+    public ListAssert<VariableInstance> variables() {
+        isNotNull();
+
+        return assertThat(getRuntimeService().createVariableInstanceQuery().processInstanceId(actual.getId()).list());
+    }
+
+    public ObjectAssert<VariableInstance> variable(String variableName) {
+        isNotNull();
+
+        return assertThat(
+                getRuntimeService().createVariableInstanceQuery().processInstanceId(actual.getId()).variableName(variableName).singleResult()
+        ).isNotNull();
+    }
+
+    public ListAssert<IdentityLink> identityLinks() {
+        isNotNull();
+
+        return assertThat(getRuntimeService().getIdentityLinksForProcessInstance(actual.getId()));
+    }
+
+    public ListAssert<Task> userTasks() {
+        isNotNull();
+
+        return assertThat(getTaskService().createTaskQuery().processInstanceId(actual.getId())
+                .includeProcessVariables().includeIdentityLinks().includeTaskLocalVariables().list());
+    }
+
+    public ListAssert<EventSubscription> eventSubscription() {
+        isNotNull();
+
+        return assertThat(getRuntimeService().createEventSubscriptionQuery().processInstanceId(actual.getId()).orderByCreateDate().asc().list());
     }
 
 }
