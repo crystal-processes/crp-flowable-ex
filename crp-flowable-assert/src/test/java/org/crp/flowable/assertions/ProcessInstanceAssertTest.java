@@ -140,7 +140,7 @@ class ProcessInstanceAssertTest {
         ProcessInstance processInstance = createOneTaskProcess(runtimeService);
 
         assertThat(processInstance).activities().extracting(ActivityInstance::getActivityId)
-                .contains("theStart", "theStart->theTask", "theTask");
+                .contains("theStart", "theStart-theTask", "theTask");
     }
 
     @Test
