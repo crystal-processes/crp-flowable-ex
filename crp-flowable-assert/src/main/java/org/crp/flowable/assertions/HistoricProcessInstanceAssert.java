@@ -1,14 +1,15 @@
 package org.crp.flowable.assertions;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ListAssert;
-import org.assertj.core.api.ObjectAssert;
-import org.flowable.common.engine.impl.history.HistoryLevel;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.identitylink.api.IdentityLink;
 import org.flowable.identitylink.api.history.HistoricIdentityLink;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
+import org.flowable.variable.api.persistence.entity.VariableInstance;
 
 import static org.crp.flowable.assertions.CrpFlowableAssertions.assertThat;
 import static org.crp.flowable.assertions.Utils.*;
@@ -24,14 +25,19 @@ public class HistoricProcessInstanceAssert extends AbstractAssert<HistoricProces
      * @return Assertion of {@link HistoricActivityInstance} list.
      */
     public ListAssert<HistoricActivityInstance> activities() {
-        processExistsInHistory(HistoryLevel.ACTIVITY);
+        processExistsInHistory();
 
         return assertThat(getHistoryService().createHistoricActivityInstanceQuery().processInstanceId(actual.getId())
                 .orderByHistoricActivityInstanceStartTime().desc().list());
     }
 
+    /**
+     * Assert <b>historic</b> process instance exists in the history and is finished.
+     *
+     * @return Historic process instance assertion.
+     */
     public HistoricProcessInstanceAssert isFinished() {
-        processExistsInHistory(HistoryLevel.INSTANCE);
+        processExistsInHistory();
 
         if (getHistoryService().createHistoricProcessInstanceQuery().finished().processInstanceId(actual.getId()).count() != 1) {
             failWithMessage(getProcessDescription(actual)+" to be finished, but is running in history.");
@@ -41,43 +47,86 @@ public class HistoricProcessInstanceAssert extends AbstractAssert<HistoricProces
     }
 
     public ListAssert<HistoricVariableInstance> variables() {
-        isNotNull();
+        processExistsInHistory();
 
-        return assertThat(getHistoryService().createHistoricVariableInstanceQuery().processInstanceId(actual.getId()).list());
+        return assertThat(getHistoryService().createHistoricVariableInstanceQuery().processInstanceId(actual.getId()).orderByVariableName().asc().list());
     }
 
-    public ObjectAssert<HistoricVariableInstance> variable(String variableName) {
-        isNotNull();
+    /**
+     * Assert that process instance has variable in <b>history</b>.
+     *
+     * @param variableName variable to check.
+     * @return Historic process instance assertion
+     */
 
-        return assertThat(
-                getHistoryService().createHistoricVariableInstanceQuery().processInstanceId(actual.getId()).variableName(variableName).singleResult()
-        ).isNotNull();
+    public HistoricProcessInstanceAssert hasVariable(String variableName) {
+        processExistsInHistory();
+
+        if (getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(actual.getId()).variableExists(variableName).count() != 1) {
+            failWithMessage(getProcessDescription(actual)+" has variable <%s> but variable does not exist in history.", variableName);
+        }
+
+        return this;
     }
 
+    /**
+     * Assert that process instance does not have variable in <b>history</b>.
+     * @param variableName variable to check
+     * @return Historic process instance assertion
+     */
+    public HistoricProcessInstanceAssert doesNotHaveVariable(String variableName) {
+        processExistsInHistory();
+
+        if (getRuntimeService().createProcessInstanceQuery().processInstanceId(actual.getId()).variableExists(variableName).count() != 0) {
+            failWithMessage(getProcessDescription(actual)+" does not have variable <%s> but variable exists in history.", variableName);
+        }
+
+        return this;
+    }
+
+    /**
+     * Assert that process instance has variable in <b>history</b> with value equals to expectedValue.
+     *
+     * @param variableName variable to check.
+     * @param expectedValue expected variable value.
+     * @return Historic process instance assertion
+     */
+    public HistoricProcessInstanceAssert hasVariableWithValue(String variableName, Object expectedValue) {
+        processExistsInHistory();
+        hasVariable(variableName);
+
+        VariableInstance actualVariable = getRuntimeService().createVariableInstanceQuery().processInstanceId(actual.getId()).variableName(variableName).singleResult();
+        Assertions.assertThat(actualVariable.getValue()).isEqualTo(expectedValue);
+        return this;
+    }
+
+    /**
+     * Assert list of <b>runtime</b> identity links without ordering.
+     *
+     * @return Assertion of #{@link IdentityLink} list.
+     */
     public ListAssert<HistoricIdentityLink> identityLinks() {
-        isNotNull();
+        processExistsInHistory();
 
         return assertThat(getHistoryService().getHistoricIdentityLinksForProcessInstance(actual.getId()));
     }
 
+    /**
+     * Assert list of user tasks in the <b>history</b> ordered by the task name ascending.
+     * Process, Task variables and identityLinks are included.
+     *
+     * @return Assertion of {@link HistoricTaskInstance} list.
+     */
     public ListAssert<HistoricTaskInstance> userTasks() {
-        isNotNull();
+        processExistsInHistory();
 
-        return assertThat(getHistoryService().createHistoricTaskInstanceQuery().processInstanceId(actual.getId())
+        return assertThat(getHistoryService().createHistoricTaskInstanceQuery().processInstanceId(actual.getId()).orderByTaskName().asc()
                 .includeProcessVariables().includeIdentityLinks().includeTaskLocalVariables().list());
     }
 
-    private void processExistsInHistory(HistoryLevel minHistoryLevel) {
+    private void processExistsInHistory() {
         isNotNull();
-        isHistoryLevelAt(minHistoryLevel);
         isInHistory();
-    }
-
-    private void isHistoryLevelAt(HistoryLevel historyLevel) {
-        if (!Utils.getProcessEngine().getProcessEngineConfiguration().getHistoryLevel().isAtLeast(historyLevel)) {
-            failWithMessage("Process engine <%s> does not run at history level <%s>.",
-                    Utils.getProcessEngine().getName(), historyLevel);
-        }
     }
 
     private void isInHistory() {
