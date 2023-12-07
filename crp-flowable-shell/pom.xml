@@ -5,11 +5,11 @@
     <parent>
         <groupId>io.github.crystal-processes</groupId>
         <artifactId>crp-flowable-ex</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>0.0.5</version>
     </parent>
 
     <artifactId>crp-flowable-shell</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.5</version>
     <name>crp-flowable-shell</name>
     <description>flowable shell application</description>
 
@@ -168,7 +168,7 @@
     </build>
 
     <scm>
-        <tag>0.0.2</tag>
+        <tag>0.0.5</tag>
     </scm>
 
     <profiles>
