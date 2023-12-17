@@ -9,6 +9,7 @@ import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.test.Deployment;
 import org.flowable.engine.test.FlowableTest;
+import org.flowable.task.api.Task;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,7 +44,7 @@ class HistoricProcessInstanceAssertTest {
 
     @Test
     @Deployment(resources = "oneTask.bpmn20.xml")
-    void variables(RuntimeService runtimeService) {
+    void variables(RuntimeService runtimeService, TaskService taskService) {
         ProcessInstance oneTaskProcess = createOneTaskProcess(runtimeService);
 
         assertThat(oneTaskProcess).as("No variable exists in the process scope.")
@@ -53,6 +54,18 @@ class HistoricProcessInstanceAssertTest {
 
         assertThat(oneTaskProcess).as("Variable exists in the process scope, the variable must be present in the history.")
                 .inHistory()
+                .hasVariable("testVariable")
+                .hasVariableWithValue("testVariable", "variableValue")
+                .variables().hasSize(1).extracting("name", "value").
+                containsExactly(Tuple.tuple("testVariable", "variableValue"));
+
+        Task task = taskService.createTaskQuery().processInstanceId(oneTaskProcess.getId()).singleResult();
+        taskService.complete(task.getId());
+
+        assertThat(oneTaskProcess).as("Variable exists in the process scope, the variable must be present in the history.")
+                .doesNotExist()
+                .inHistory()
+                .isFinished()
                 .hasVariable("testVariable")
                 .hasVariableWithValue("testVariable", "variableValue")
                 .variables().hasSize(1).extracting("name", "value").

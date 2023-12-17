@@ -23,9 +23,8 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 /**
- * The goal of this Sensor is to load the results of an analysis performed by a fictive external tool named: FooLint
+ * The goal of this Sensor is to load the results of an analysis performed by a BPM coverage.
  * Results are provided as an xml file and are corresponding to the rules defined in 'rules.xml'.
- * To be very abstract, these rules are applied on source files made with the fictive language Foo.
  */
 public class BpmnCoverageLoaderSensor implements Sensor {
 

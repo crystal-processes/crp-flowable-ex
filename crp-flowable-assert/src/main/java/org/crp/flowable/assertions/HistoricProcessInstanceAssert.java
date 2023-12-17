@@ -9,10 +9,10 @@ import org.flowable.identitylink.api.IdentityLink;
 import org.flowable.identitylink.api.history.HistoricIdentityLink;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
-import org.flowable.variable.api.persistence.entity.VariableInstance;
 
 import static org.crp.flowable.assertions.CrpFlowableAssertions.assertThat;
-import static org.crp.flowable.assertions.Utils.*;
+import static org.crp.flowable.assertions.Utils.getHistoryService;
+import static org.crp.flowable.assertions.Utils.getProcessDescription;
 
 public class HistoricProcessInstanceAssert extends AbstractAssert<HistoricProcessInstanceAssert, HistoricProcessInstance> {
     protected HistoricProcessInstanceAssert(HistoricProcessInstance historicProcessInstance) {
@@ -77,7 +77,7 @@ public class HistoricProcessInstanceAssert extends AbstractAssert<HistoricProces
     public HistoricProcessInstanceAssert doesNotHaveVariable(String variableName) {
         processExistsInHistory();
 
-        if (getRuntimeService().createProcessInstanceQuery().processInstanceId(actual.getId()).variableExists(variableName).count() != 0) {
+        if (getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(actual.getId()).variableExists(variableName).count() != 0) {
             failWithMessage(getProcessDescription(actual)+" does not have variable <%s> but variable exists in history.", variableName);
         }
 
@@ -95,13 +95,13 @@ public class HistoricProcessInstanceAssert extends AbstractAssert<HistoricProces
         processExistsInHistory();
         hasVariable(variableName);
 
-        VariableInstance actualVariable = getRuntimeService().createVariableInstanceQuery().processInstanceId(actual.getId()).variableName(variableName).singleResult();
+        HistoricVariableInstance actualVariable = getHistoryService().createHistoricVariableInstanceQuery().processInstanceId(actual.getId()).variableName(variableName).singleResult();
         Assertions.assertThat(actualVariable.getValue()).isEqualTo(expectedValue);
         return this;
     }
 
     /**
-     * Assert list of <b>runtime</b> identity links without ordering.
+     * Assert list of <b>historic</b> identity links without ordering.
      *
      * @return Assertion of #{@link IdentityLink} list.
      */
