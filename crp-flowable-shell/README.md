@@ -15,21 +15,31 @@ shell:>help
 AVAILABLE COMMANDS
 
 Deployment
-        delete-deployments, rmd: Delete all deployments with given name, tenantId from runtime. WARNING - use only for testing purposes
-        deploy: Deploy given application
-        list-deployments, lsd: list deployments
+       list-deployments, lsd: list deployments
+       rmd, delete-deployments: Delete all deployments with given name, tenantId from runtime. WARNING - use only for testing purposes
+       deploy: Deploy given application
+
+Designer
+       dx, designer-export: Export application model from modeler to file.
 
 Model
-        delete-model, rm: Delete model from modeler.
-        export: Export model from modeler to file.
-        export-bar: Export deployable model from modeler to file.
-        import: Import file to modeler.
-        list, ls: List models.
+       import: Import file to modeler.
+       ls, list: List models.
+       rm, delete-model: Delete model from modeler.
+       export-bar: Export deployable model from modeler to file.
+       export: Export model from modeler to file.
+
+Raw Rest
+       ex, execute: execute url.
+       exl, execute-logged: execute url with logged in client.
+
+Template Processor
+       gt, generate-test: Generate test from flowable history.
 
 Utils
-        configure: Configure flowable rest endpoint.
-        unzip: Unzip file to directory.
-        zip: Zip directory to file.
+       zip: Zip directory to file.
+       configure: Configure flowable rest endpoint.
+       unzip: Unzip file to directory.
 ```
 
 ### Export application model from modeler and deploy to app
