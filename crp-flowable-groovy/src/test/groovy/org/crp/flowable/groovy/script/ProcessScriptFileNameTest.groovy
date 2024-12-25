@@ -50,7 +50,7 @@ class ProcessScriptFileNameTest {
     @Test
     @Deployment(resources= 'org/crp/flowable/groovy/script/oneScriptTask.bpmn20.xml')
     void runScriptWithOverrideStrategy(RuntimeService runtimeService) {
-        runScript(runtimeService);
+        runScript(runtimeService)
 
         changeGroovyFileContent()
 
