@@ -1,0 +1,24 @@
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="test">
+
+    <process id="oneScriptTask">
+
+        <startEvent id="theStart" />
+        <sequenceFlow id="flow1" sourceRef="theStart" targetRef="GetClassNameScriptTask" />
+
+        <scriptTask id="GetClassNameScriptTask" scriptFormat="groovy" flowable:resultVariable="className">
+            <script><![CDATA[
+
+        this.getClass().getTypeName()
+
+        ]]></script>
+        </scriptTask>
+        <sequenceFlow id="flow2" sourceRef="GetClassNameScriptTask" targetRef="theEnd" />
+
+        <endEvent id="theEnd" />
+
+    </process>
+
+</definitions>

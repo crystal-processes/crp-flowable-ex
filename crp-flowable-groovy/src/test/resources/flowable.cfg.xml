@@ -52,6 +52,11 @@
 
 		<property name="enableHistoricTaskLogging" value="true"/>
 
+		<property name="postDefaultResolverFactories">
+			<list>
+				<bean class="org.crp.flowable.groovy.script.ProcessScriptFileNameResolverFactory"/>
+			</list>
+		</property>
 	</bean>
 
 	<bean id="asyncExecutor" class="org.flowable.job.service.impl.asyncexecutor.DefaultAsyncJobExecutor">

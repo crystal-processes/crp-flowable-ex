@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.omg.org/spec/CMMN/20151109/MODEL https://www.omg.org/spec/CMMN/20151109/CMMN11.xsd"
+             xmlns:flowable="http://flowable.org/cmmn"
+             targetNamespace="http://flowable.org/cmmn">
+
+    <case id="scriptCase" flowable:initiatorVariableName="test">
+        <casePlanModel id="myScriptPlanModelWithPackage" name="My Script CasePlanModel">
+
+            <planItem id="planItemTaskB" definitionRef="ScriptTask" />
+
+      <task id="ScriptTask" name="Script task" flowable:type="script" flowable:scriptFormat="groovy" flowable:resultVariableName="className">
+        <extensionElements>
+          <flowable:field name="script">
+            <flowable:string><![CDATA[package oneScriptTask
+            this.getClass().getTypeName()]]></flowable:string>
+          </flowable:field>
+        </extensionElements>
+      </task>
+
+        </casePlanModel>
+    </case>
+
+</definitions>

@@ -19,11 +19,13 @@
             <groupId>org.flowable</groupId>
             <artifactId>flowable-engine</artifactId>
             <version>${flowable.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.groovy</groupId>
@@ -32,11 +34,23 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.github.crystal-processes</groupId>
+            <artifactId>crp-flowable-assert</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>${groovy.version}</version>
             <type>pom</type>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-cmmn-engine</artifactId>
+            <version>${flowable.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -47,7 +61,7 @@
                 visit https://github.com/groovy/GMavenPlus/wiki -->
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>4.0.1</version>
                 <executions>
                     <execution>
                         <id>default</id>
@@ -55,7 +69,7 @@
                             <goal>compile</goal>
                             <goal>compileTests</goal>
                             <goal>addSources</goal>
-                            <goal>groovydoc-jar</goal>
+<!--                            <goal>groovydoc-jar</goal>-->
                         </goals>
                     </execution>
                 </executions>

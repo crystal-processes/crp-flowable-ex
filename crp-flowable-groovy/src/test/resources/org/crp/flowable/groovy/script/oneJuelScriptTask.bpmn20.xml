@@ -1,0 +1,20 @@
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="test">
+
+    <process id="oneScriptTask">
+
+        <startEvent id="theStart" />
+        <sequenceFlow id="flow1" sourceRef="theStart" targetRef="GetClassNameScriptTask" />
+
+        <scriptTask id="GetClassNameScriptTask" scriptFormat="juel" flowable:resultVariable="className">
+            <script><![CDATA[${1+1}]]></script>
+        </scriptTask>
+        <sequenceFlow id="flow2" sourceRef="GetClassNameScriptTask" targetRef="theEnd" />
+
+        <endEvent id="theEnd" />
+
+    </process>
+
+</definitions>
