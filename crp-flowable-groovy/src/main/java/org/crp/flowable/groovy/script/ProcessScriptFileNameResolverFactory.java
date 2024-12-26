@@ -28,6 +28,12 @@ public class ProcessScriptFileNameResolverFactory implements ResolverFactory {
                 ScriptDiffersStrategy.OVERRIDE);
     }
 
+    /**
+     * Provides a resolver for the script file name for jsr223-compliant script engines.
+     *
+     * @param pathPrefix the prefix path where to store file content if scriptDiffersStrategy allows file content overwriting
+     * @param scriptDiffersStrategy defines what to do if file and script content differ.
+     */
     public ProcessScriptFileNameResolverFactory(String pathPrefix, ScriptDiffersStrategy scriptDiffersStrategy) {
         this.pathPrefix = pathPrefix;
         this.scriptDiffersStrategy = scriptDiffersStrategy;
