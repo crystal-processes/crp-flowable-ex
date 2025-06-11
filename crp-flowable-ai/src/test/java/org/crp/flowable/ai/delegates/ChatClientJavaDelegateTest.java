@@ -11,10 +11,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.converter.MapOutputConverter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -29,6 +31,7 @@ class ChatClientJavaDelegateTest {
     ChatClient chatClient = mock(ChatClient.class);
     ChatClient.ChatClientRequestSpec requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
     ChatClient.CallResponseSpec response = mock(ChatClient.CallResponseSpec.class);
+    Advisor advisor = mock(Advisor.class);
 
     @AfterEach
     void resetMocks() {
@@ -51,6 +54,18 @@ class ChatClientJavaDelegateTest {
                 createProcessInstanceWithCorrectParameters(runtimeService)
         )
                 .hasVariableWithValue("greeting", "Hello World!");
+    }
+
+    @Test
+    @Deployment(resources = "org/crp/flowable/ai/delegates/chatClientCallProcess.bpmn")
+    void callChatClientWithAdvisor(RuntimeService runtimeService) {
+        assertThat(
+                createProcessInstanceWithAdvisor(runtimeService)
+        )
+                .hasVariableWithValue("greeting", "Hello World!");
+
+        verify(advisor, atLeastOnce()).getName();
+        verify(advisor, atLeastOnce()).getOrder();
     }
 
     @Test
@@ -333,6 +348,21 @@ class ChatClientJavaDelegateTest {
                         "system", "You are hello world client. You always answers 'Hello world!'!",
                         "user", "Hello!",
                         "resultVariableName", "greeting",
+                        "isTransient", false
+                ))
+                .transientVariable("structuredOutputConverter", null)
+                .start();
+    }
+
+    private ProcessInstance createProcessInstanceWithAdvisor(RuntimeService runtimeService) {
+
+        return createChatClientProcessInstanceBuilder(runtimeService)
+                .transientVariables(Map.of(
+                        "chatClient", chatClient,
+                        "system", "You are hello world client. You always answers 'Hello world!'!",
+                        "user", "Hello!",
+                        "resultVariableName", "greeting",
+                            "advisors", List.of(advisor),
                         "isTransient", false
                 ))
                 .transientVariable("structuredOutputConverter", null)

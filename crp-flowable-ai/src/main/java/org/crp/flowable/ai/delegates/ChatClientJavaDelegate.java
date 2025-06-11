@@ -7,8 +7,11 @@ import org.flowable.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.converter.MapOutputConverter;
 import org.springframework.ai.converter.StructuredOutputConverter;
+
+import java.util.List;
 
 public class ChatClientJavaDelegate implements JavaDelegate {
     private  static final Logger LOG = LoggerFactory.getLogger(ChatClientJavaDelegate.class);
@@ -16,6 +19,7 @@ public class ChatClientJavaDelegate implements JavaDelegate {
     protected Expression chatClient;
     protected Expression system;
     protected Expression user;
+    protected Expression advisors;
     protected Expression structuredOutputConverter;
     protected Expression resultVariableName;
     protected Expression isTransient;
@@ -54,11 +58,18 @@ public class ChatClientJavaDelegate implements JavaDelegate {
 
         protected Object chatClientCall() {
             return structureOutputFor(
-                    inputs.chatClient().prompt()
-                            .system(inputs.system())
-                            .user(inputs.user())
-                            .call()
+                    callChatClient()
             );
+        }
+
+        private ChatClient.CallResponseSpec callChatClient() {
+            var requestSpec = inputs.chatClient().prompt()
+                    .system(inputs.system())
+                    .user(inputs.user());
+            if (!inputs.advisors().isEmpty()) {
+                requestSpec.advisors(inputs.advisors());
+            }
+            return requestSpec.call();
         }
 
         private Object structureOutputFor(ChatClient.CallResponseSpec callResponse) {
@@ -73,24 +84,36 @@ public class ChatClientJavaDelegate implements JavaDelegate {
 
         protected InputValues validatedInputs(DelegateExecution execution) {
             return new InputValues(
-                    (ChatClient) getMandatoryValue("chatClient", chatClient, execution),
-                    (String) getMandatoryValue("system",system, execution),
-                    (String) getMandatoryValue("user", user, execution),
-                    (StructuredOutputConverter<?>) getValue(structuredOutputConverter, execution, new MapOutputConverter()),
-                    (String) getMandatoryValue("ResultVariableName", resultVariableName, execution),
-                    (boolean) getValue(isTransient, execution, false));
+                    getMandatoryValue("chatClient", chatClient, execution, ChatClient.class),
+                    getMandatoryValue("system",system, execution, String.class),
+                    getMandatoryValue("user", user, execution, String.class),
+                    getValue(structuredOutputConverter, execution, new MapOutputConverter(), StructuredOutputConverter.class),
+                    getMandatoryValue("ResultVariableName", resultVariableName, execution, String.class),
+                    getValue(isTransient, execution, false, Boolean.class),
+                    getValue(advisors, execution, List.of(), List.class)
+                    );
         }
 
-        protected static Object getValue(Expression expression, DelegateExecution execution, Object defaultValue) {
-            return expression != null ? expression.getValue(execution) : defaultValue;
+        protected static <T> T getValue(Expression expression, DelegateExecution execution, T defaultValue, Class<T> expectedClass) {
+            if (expression == null) {
+                return defaultValue;
+            }
+            Object value = expression.getValue(execution);
+            if (value == null) {
+                return null;
+            }
+            if (expectedClass.isInstance(value)) {
+                return expectedClass.cast(value);
+            }
+            throw new ClassCastException("Unable to cast "+ value.getClass().getName() + "to expected "+ expectedClass.getName());
         }
 
-        protected static Object getValue(Expression expression, DelegateExecution execution) {
-            return getValue(expression, execution, null);
+        protected static <T> T getValue(Expression expression, DelegateExecution execution, Class<T> expectedClass) {
+            return getValue(expression, execution, null, expectedClass);
         }
 
-        protected static Object getMandatoryValue(String name, Expression expression, DelegateExecution execution) {
-            Object value = getValue(expression, execution);
+        protected static <T> T getMandatoryValue(String name, Expression expression, DelegateExecution execution, Class<T> expectedClass) {
+            T value = getValue(expression, execution, expectedClass);
             if (value == null) {
                 LOG.error("{} is mandatory.", name);
                 throw new AiException(name + " is mandatory");
@@ -102,4 +125,4 @@ public class ChatClientJavaDelegate implements JavaDelegate {
 }
 
 record InputValues(ChatClient chatClient, String system, String user, StructuredOutputConverter<?> structuredOutputConverter,
-                   String resultVariableName, boolean isTransient) {}
+                   String resultVariableName, boolean isTransient, List<Advisor> advisors) {}
