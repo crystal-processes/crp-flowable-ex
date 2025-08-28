@@ -19,12 +19,17 @@ import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl
 import org.flowable.engine.impl.history.DefaultHistoryManager
 import org.flowable.engine.impl.history.HistoryManager
 import org.flowable.job.api.HistoryJob
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import spock.lang.Specification
 
 /**
  * author martin.grofcik
  */
 abstract class InternalFlowableSpecification extends Specification {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass())
+
     protected static List<String> deploymentIdsForAutoCleanup = new ArrayList<>()
 
     protected static ProcessEngineConfigurationImpl processEngineConfiguration
