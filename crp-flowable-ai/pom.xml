@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>crp-flowable-ai</artifactId>
+    <name>crp-flowable-ai</name>
     <version>0.0.7</version>
 
     <properties>
