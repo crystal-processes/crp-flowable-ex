@@ -12,6 +12,9 @@
     <artifactId>crp-flowable-ex-bom</artifactId>
     <name>crp-flowable-ex-bom</name>
     <packaging>pom</packaging>
+    <scm>
+        <url>https://github.com/crystal-processes/crp-flowable-ex.git</url>
+    </scm>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
