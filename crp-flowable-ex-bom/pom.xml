@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>crp-flowable-ex-bom</artifactId>
+    <name>crp-flowable-ex-bom</name>
     <packaging>pom</packaging>
 
     <properties>
