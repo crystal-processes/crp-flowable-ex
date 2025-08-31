@@ -13,6 +13,7 @@
     <name>crp-flowable-ex-bom</name>
     <packaging>pom</packaging>
     <scm>
+        <developerConnection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</developerConnection>
         <url>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</url>
     </scm>
 
