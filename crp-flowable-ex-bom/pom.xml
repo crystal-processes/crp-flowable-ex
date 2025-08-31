@@ -23,7 +23,7 @@
             <dependency>
                 <groupId>io.github.crystal-processes</groupId>
                 <artifactId>crp-bpm-sonarqube-plugin</artifactId>
-                <version>0.0.7-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.crystal-processes</groupId>

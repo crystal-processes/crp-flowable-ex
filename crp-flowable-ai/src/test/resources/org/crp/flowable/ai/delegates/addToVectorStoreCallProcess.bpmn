@@ -1,30 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:design="http://flowable.org/design" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://flowable.org/test" design:palette="flowable-work-process-palette">
-  <process id="chatClientCallProcess" name="chatClientCallProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
+  <process id="addToVectorStoreCallProcess" name="addToVectorStoreCallProcess" isExecutable="true" flowable:candidateStarterGroups="flowableUser">
     <extensionElements>
     </extensionElements>
-    <serviceTask id="ServiceTask_1" name="Service task" flowable:class="org.crp.flowable.ai.delegates.ChatClientJavaDelegate">
+    <serviceTask id="addToVectorStoreTask" name="Service task" flowable:class="org.crp.flowable.ai.delegates.AddToVectorStoreJavaDelegate">
       <extensionElements>
-        <flowable:field name="chatClient">
-          <flowable:expression><![CDATA[${chatClient}]]></flowable:expression>
+        <flowable:field name="vectorStore">
+          <flowable:expression><![CDATA[${vectorStore}]]></flowable:expression>
         </flowable:field>
-        <flowable:field name="advisors">
-          <flowable:expression><![CDATA[${advisors}]]></flowable:expression>
-        </flowable:field>
-        <flowable:field name="system">
-          <flowable:expression><![CDATA[${system}]]></flowable:expression>
-        </flowable:field>
-        <flowable:field name="user">
-          <flowable:expression><![CDATA[${user}]]></flowable:expression>
-        </flowable:field>
-        <flowable:field name="structuredOutputConverter">
-          <flowable:expression><![CDATA[${structuredOutputConverter}]]></flowable:expression>
-        </flowable:field>
-        <flowable:field name="resultVariableName">
-          <flowable:expression><![CDATA[${resultVariableName}]]></flowable:expression>
-        </flowable:field>
-        <flowable:field name="isTransient">
-          <flowable:expression><![CDATA[${isTransient}]]></flowable:expression>
+        <flowable:field name="documentUrl">
+          <flowable:expression><![CDATA[${documentUrl}]]></flowable:expression>
         </flowable:field>
         <design:stencilid><![CDATA[ServiceTask]]></design:stencilid>
         <design:stencilsuperid><![CDATA[Task]]></design:stencilsuperid>
@@ -42,12 +27,12 @@
             <design:stencilsuperid>Task</design:stencilsuperid>
         </extensionElements>
     </receiveTask>
-    <sequenceFlow id="SequenceFlow_4" sourceRef="ServiceTask_1" targetRef="ReceiveTask_3">
+    <sequenceFlow id="SequenceFlow_4" sourceRef="addToVectorStoreTask" targetRef="ReceiveTask_3">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>
     </sequenceFlow>
-    <sequenceFlow id="SequenceFlow_2" sourceRef="startnoneevent1" targetRef="ServiceTask_1">
+    <sequenceFlow id="SequenceFlow_2" sourceRef="startnoneevent1" targetRef="addToVectorStoreTask">
       <extensionElements>
         <design:stencilid><![CDATA[SequenceFlow]]></design:stencilid>
       </extensionElements>

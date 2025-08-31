@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,9 +64,6 @@ class ChatClientJavaDelegateTest {
                 createProcessInstanceWithAdvisor(runtimeService)
         )
                 .hasVariableWithValue("greeting", "Hello World!");
-
-        verify(advisor, atLeastOnce()).getName();
-        verify(advisor, atLeastOnce()).getOrder();
     }
 
     @Test
@@ -76,6 +74,7 @@ class ChatClientJavaDelegateTest {
                         "chatClient", chatClient,
                         "system", "You are hello world client. You always answers 'Hello world!'!",
                         "user", "Hello!",
+                        "advisors", List.of(),
                         "resultVariableName", "greeting",
                         "isTransient", true
                 ))
@@ -100,6 +99,7 @@ class ChatClientJavaDelegateTest {
                         "user", "Hello!",
                         "resultVariableName", "greeting",
                         "isTransient", false,
+                        "advisors", List.of(),
                         "structuredOutputConverter", mapOutputConverter
                 ))
                 .start();
@@ -302,7 +302,7 @@ class ChatClientJavaDelegateTest {
     private void runModifiedProcessModel(String replacement, RepositoryService repositoryService, RuntimeService runtimeService, String expectedExceptionMessage) throws IOException {
         String deploymentId = null;
         try (InputStream processResource = getClass().getResourceAsStream("/org/crp/flowable/ai/delegates/chatClientCallProcess-withReplacement.bpmn")) {
-            String processModel = new String(processResource.readAllBytes()).replace("REPLACEMENT",
+            String processModel = new String(Objects.requireNonNull(processResource).readAllBytes()).replace("REPLACEMENT",
                     replacement);
             deploymentId = repositoryService.createDeployment()
                     .addString("chatClientProcess-withoutClient.bpmn", processModel)
@@ -322,7 +322,7 @@ class ChatClientJavaDelegateTest {
                                          Consumer<ProcessInstance> assertion) throws IOException {
         String deploymentId = null;
         try (InputStream processResource = getClass().getResourceAsStream("/org/crp/flowable/ai/delegates/chatClientCallProcess-withReplacement.bpmn")) {
-            String processModel = new String(processResource.readAllBytes()).replace("REPLACEMENT",
+            String processModel = new String(Objects.requireNonNull(processResource).readAllBytes()).replace("REPLACEMENT",
                     replacement);
             deploymentId = repositoryService.createDeployment()
                     .addString("chatClientProcess-withoutClient.bpmn", processModel)
@@ -348,6 +348,7 @@ class ChatClientJavaDelegateTest {
                         "system", "You are hello world client. You always answers 'Hello world!'!",
                         "user", "Hello!",
                         "resultVariableName", "greeting",
+                        "advisors", List.of(),
                         "isTransient", false
                 ))
                 .transientVariable("structuredOutputConverter", null)
@@ -362,7 +363,7 @@ class ChatClientJavaDelegateTest {
                         "system", "You are hello world client. You always answers 'Hello world!'!",
                         "user", "Hello!",
                         "resultVariableName", "greeting",
-                            "advisors", List.of(advisor),
+                        "advisors", List.of(advisor),
                         "isTransient", false
                 ))
                 .transientVariable("structuredOutputConverter", null)

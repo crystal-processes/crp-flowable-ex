@@ -1,6 +1,5 @@
 package org.crp.flowable.ai.delegates;
 
-import org.crp.flowable.ai.AiException;
 import org.flowable.common.engine.api.delegate.Expression;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
@@ -84,41 +83,14 @@ public class ChatClientJavaDelegate implements JavaDelegate {
 
         protected InputValues validatedInputs(DelegateExecution execution) {
             return new InputValues(
-                    getMandatoryValue("chatClient", chatClient, execution, ChatClient.class),
-                    getMandatoryValue("system",system, execution, String.class),
-                    getMandatoryValue("user", user, execution, String.class),
-                    getValue(structuredOutputConverter, execution, new MapOutputConverter(), StructuredOutputConverter.class),
-                    getMandatoryValue("ResultVariableName", resultVariableName, execution, String.class),
-                    getValue(isTransient, execution, false, Boolean.class),
-                    getValue(advisors, execution, List.of(), List.class)
+                    ExpressionsHelper.getMandatoryValue("chatClient", chatClient, execution, ChatClient.class),
+                    ExpressionsHelper.getMandatoryValue("system",system, execution, String.class),
+                    ExpressionsHelper.getMandatoryValue("user", user, execution, String.class),
+                    ExpressionsHelper.getValue(structuredOutputConverter, execution, new MapOutputConverter(), StructuredOutputConverter.class),
+                    ExpressionsHelper.getMandatoryValue("ResultVariableName", resultVariableName, execution, String.class),
+                    ExpressionsHelper.getValue(isTransient, execution, false, Boolean.class),
+                    ExpressionsHelper.getValue(advisors, execution, List.of(), List.class)
                     );
-        }
-
-        protected static <T> T getValue(Expression expression, DelegateExecution execution, T defaultValue, Class<T> expectedClass) {
-            if (expression == null) {
-                return defaultValue;
-            }
-            Object value = expression.getValue(execution);
-            if (value == null) {
-                return null;
-            }
-            if (expectedClass.isInstance(value)) {
-                return expectedClass.cast(value);
-            }
-            throw new ClassCastException("Unable to cast "+ value.getClass().getName() + "to expected "+ expectedClass.getName());
-        }
-
-        protected static <T> T getValue(Expression expression, DelegateExecution execution, Class<T> expectedClass) {
-            return getValue(expression, execution, null, expectedClass);
-        }
-
-        protected static <T> T getMandatoryValue(String name, Expression expression, DelegateExecution execution, Class<T> expectedClass) {
-            T value = getValue(expression, execution, expectedClass);
-            if (value == null) {
-                LOG.error("{} is mandatory.", name);
-                throw new AiException(name + " is mandatory");
-            }
-            return value;
         }
 
     }

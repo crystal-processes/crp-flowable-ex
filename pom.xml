@@ -48,6 +48,7 @@
     <hikari.version>3.4.2</hikari.version>
     <slf4j.version>2.0.7</slf4j.version>
     <assertj.version>3.24.2</assertj.version>
+    <mockito.version>5.19.0</mockito.version>
   </properties>
 
   <dependencies>
