@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>crp-flowable-ai</artifactId>
-    <version>0.0.7-SNAPSHOT</version>
+    <name>crp-flowable-ai</name>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
