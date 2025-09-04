@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.crystal-processes</groupId>
         <artifactId>crp-flowable-ex</artifactId>
-        <version>0.0.7</version>
+        <version>0.0.8-SNAPSHOT</version>
     </parent>
 
     <artifactId>crp-flowable-ex-bom</artifactId>
@@ -13,7 +13,7 @@
     <scm>
         <developerConnection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</developerConnection>
         <url>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</url>
-      <tag>crp-flowable-ex-0.0.7</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <properties>
