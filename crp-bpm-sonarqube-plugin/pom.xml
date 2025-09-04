@@ -5,12 +5,12 @@
   <parent>
     <artifactId>crp-flowable-ex</artifactId>
     <groupId>io.github.crystal-processes</groupId>
-    <version>0.0.7</version>
+    <version>0.0.7-SNAPSHOT</version>
   </parent>
 
   <artifactId>crp-bpm-sonarqube-plugin</artifactId>
   <packaging>sonar-plugin</packaging>
-  <version>0.0.7</version>
+  <version>0.0.7-SNAPSHOT</version>
 
   <name>BPM Sonarqube plugin</name>
   <description>Business process management plugin for Sonarqube</description>
