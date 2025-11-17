@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>
+            <artifactId>spring-ai-starter-mcp-server-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
