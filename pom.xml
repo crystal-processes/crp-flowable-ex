@@ -214,5 +214,6 @@
     <module>crp-flowable-coverage</module>
     <module>crp-bpm-sonarqube-plugin</module>
     <module>crp-flowable-assert</module>
+    <module>crp-flowable-form</module>
   </modules>
 </project>
