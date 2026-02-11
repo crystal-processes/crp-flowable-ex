@@ -1,6 +1,8 @@
 package org.crp.flowable.assertions;
 
 import org.assertj.core.api.Assertions;
+import org.flowable.cmmn.api.history.HistoricCaseInstance;
+import org.flowable.cmmn.api.runtime.CaseInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 
@@ -11,6 +13,13 @@ public class CrpFlowableAssertions extends Assertions {
     }
     public static HistoricProcessInstanceAssert assertThat(HistoricProcessInstance historicProcessInstance) {
         return new HistoricProcessInstanceAssert(historicProcessInstance);
+    }
+
+   public static CaseInstanceAssert assertThat(CaseInstance caseInstance) {
+        return new CaseInstanceAssert(caseInstance);
+    }
+    public static HistoricCaseInstanceAssert assertThat(HistoricCaseInstance historicCaseInstance) {
+        return new HistoricCaseInstanceAssert(historicCaseInstance);
     }
 
 }

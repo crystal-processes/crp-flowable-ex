@@ -4,16 +4,11 @@
     <parent>
         <groupId>io.github.crystal-processes</groupId>
         <artifactId>crp-flowable-ex</artifactId>
-        <version>0.0.7-SNAPSHOT</version>
+        <version>0.0.8-SNAPSHOT</version>
     </parent>
 
     <artifactId>crp-flowable-assert</artifactId>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <name>crp-flowable-assert</name>
 
     <dependencies>
         <dependency>
@@ -29,10 +24,22 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-cmmn-engine</artifactId>
+            <version>${flowable.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-cmmn-api</artifactId>
+            <version>${flowable.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.0.13</version>
-            <scope>compile</scope>
+            <version>${spring.framework.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

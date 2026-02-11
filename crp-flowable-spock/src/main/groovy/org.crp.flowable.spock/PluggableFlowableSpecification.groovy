@@ -15,13 +15,14 @@ package org.crp.flowable.spock
 import org.crp.flowable.spock.internal.AbstractFlowableTestCase
 import org.crp.flowable.spock.internal.InternalFlowableSpecification
 import org.flowable.common.engine.api.FlowableException
+import org.flowable.common.engine.impl.agenda.AgendaOperationExecutionListener
 import org.flowable.common.engine.impl.cfg.CommandExecutorImpl
 import org.flowable.common.engine.impl.interceptor.CommandExecutor
 import org.flowable.common.engine.impl.interceptor.CommandInterceptor
 import org.flowable.engine.ProcessEngine
 import org.flowable.engine.ProcessEngines
 import org.flowable.engine.impl.interceptor.CommandInvoker
-import org.flowable.engine.impl.interceptor.LoggingExecutionTreeCommandInvoker
+import org.flowable.engine.impl.interceptor.LoggingExecutionTreeAgendaOperationExecutionListener
 import org.flowable.engine.test.EnableVerboseExecutionTreeLogging
 import org.junit.platform.commons.support.AnnotationSupport
 
@@ -77,7 +78,7 @@ abstract class PluggableFlowableSpecification extends InternalFlowableSpecificat
         return processEngine
     }
 
-    protected static void swapCommandInvoker(ProcessEngine processEngine, boolean debug) {
+    protected void swapCommandInvoker(ProcessEngine processEngine, boolean debug) {
         CommandExecutor commandExecutor = processEngine.getProcessEngineConfiguration().getCommandExecutor()
         if (commandExecutor instanceof CommandExecutorImpl) {
             CommandExecutorImpl commandExecutorImpl = (CommandExecutorImpl) commandExecutor
@@ -87,10 +88,20 @@ abstract class PluggableFlowableSpecification extends InternalFlowableSpecificat
 
             while (commandInterceptor != null) {
 
-                boolean matches = debug ? (commandInterceptor instanceof CommandInvoker) : (commandInterceptor instanceof LoggingExecutionTreeCommandInvoker)
-                if (matches) {
+                if (commandInterceptor instanceof CommandInvoker) {
 
-                    CommandInterceptor commandInvoker = debug ? new LoggingExecutionTreeCommandInvoker() : new CommandInvoker()
+                    Collection<AgendaOperationExecutionListener> agendaOperationExecutionListeners = processEngine.getProcessEngineConfiguration()
+                            .getAgendaOperationExecutionListeners()
+                    if (debug) {
+                        if (agendaOperationExecutionListeners == null) {
+                            agendaOperationExecutionListeners = new ArrayList<>()
+                        } else {
+                            agendaOperationExecutionListeners = new ArrayList<>(agendaOperationExecutionListeners)
+                        }
+                        agendaOperationExecutionListeners.add(new LoggingExecutionTreeAgendaOperationExecutionListener())
+                    }
+
+                    CommandInterceptor commandInvoker = new CommandInvoker(processEngine.getProcessEngineConfiguration().getAgendaOperationRunner(), agendaOperationExecutionListeners)
                     if (previousCommandInterceptor != null) {
                         previousCommandInterceptor.setNext(commandInvoker)
                     } else {
@@ -104,6 +115,8 @@ abstract class PluggableFlowableSpecification extends InternalFlowableSpecificat
                 }
             }
 
+        } else {
+            logger.warn("Not using {}, ignoring the {} annotation", CommandExecutorImpl.class, EnableVerboseExecutionTreeLogging.class)
         }
     }
 

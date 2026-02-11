@@ -2,7 +2,7 @@
 
 # How to
 
-## How to deploy
+## How to release
 ```
-mvn clean package gpg:sign deploy
+mvnw release:prepare release:perform -DskipTests=true -Pci/cd
 ```
