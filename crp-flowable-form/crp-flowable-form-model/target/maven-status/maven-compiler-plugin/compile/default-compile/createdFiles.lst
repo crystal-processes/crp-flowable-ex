@@ -1,9 +1,0 @@
-org\flowable\form\model\FormField.class
-org\flowable\form\model\Option.class
-org\flowable\form\model\OptionFormField.class
-org\flowable\form\model\FormOutcome.class
-org\flowable\form\model\LayoutDefinition.class
-org\flowable\form\model\FormFieldTypes.class
-org\flowable\form\model\SimpleFormModel.class
-org\flowable\form\model\ExpressionFormField.class
-org\flowable\form\model\FormContainer.class

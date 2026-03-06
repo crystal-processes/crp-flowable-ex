@@ -262,7 +262,7 @@
     <module>crp-bpm-sonarqube-plugin</module>
     <module>crp-flowable-assert</module>
     <module>crp-flowable-ai</module>
+    <module>crp-flowable-ui</module>
     <module>crp-flowable-ex-bom</module>
-    <module>crp-flowable-form</module>
   </modules>
 </project>

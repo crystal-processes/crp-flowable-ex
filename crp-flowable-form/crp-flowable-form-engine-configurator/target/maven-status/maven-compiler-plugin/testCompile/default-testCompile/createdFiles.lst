@@ -1,9 +1,0 @@
-org\flowable\form\engine\test\DbSchemaDrop$1.class
-org\flowable\form\engine\test\TestValidationFormEngineConfigurator$ThrowExceptionOnValidationFormService.class
-org\flowable\form\engine\test\MixedDeploymentTest.class
-org\flowable\form\engine\test\TestValidationFormEngineConfigurator.class
-org\flowable\form\engine\test\ProcessWithFormTest.class
-org\flowable\form\engine\test\AbstractFlowableFormEngineConfiguratorTest.class
-org\flowable\form\engine\test\ProcessInstanceBuilderFormTest.class
-org\flowable\form\engine\test\DbSchemaDrop.class
-org\flowable\form\engine\test\SideEffectExecutionListener.class

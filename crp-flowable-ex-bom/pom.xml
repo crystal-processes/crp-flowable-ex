@@ -59,6 +59,11 @@
                 <artifactId>crp-flowable-spock</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.github.crystal-processes</groupId>
+                <artifactId>crp-flowable-ui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
