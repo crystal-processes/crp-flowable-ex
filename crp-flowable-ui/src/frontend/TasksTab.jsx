@@ -76,9 +76,9 @@ function TasksTab({ tasks, selectedTask, setSelectedTask, loading, fetchTasks, o
             name="showFinishedTasks"
             checked={showFinishedTasks}
             onChange={handleShowFinishedTasks}
-            aria-label="Show finished tasks"
+            aria-label="finished"
           />
-          <span>Show Finished Tasks</span>
+          <span> Finished</span>
         </label>
 
         <select
@@ -113,9 +113,10 @@ function TasksTab({ tasks, selectedTask, setSelectedTask, loading, fetchTasks, o
           </button>
         )}
 
-        <span className="task-count" role="status" aria-live="polite">
-          Showing {tasks.length} tasks (Limit: {taskLimit})
-        </span>
+          <PaginationControls
+            currentCount={memoizedTasks.length}
+            totalAvailable={memoizedTasks.length + (memoizedTasks.length >= taskLimit ? 1 : 0)}
+          />
       </div>
 
       {loading && memoizedTasks.length === 0 ? (
@@ -136,10 +137,6 @@ function TasksTab({ tasks, selectedTask, setSelectedTask, loading, fetchTasks, o
               />
             ))}
           </div>
-          <PaginationControls
-            currentCount={memoizedTasks.length}
-            totalAvailable={memoizedTasks.length + (memoizedTasks.length >= taskLimit ? 1 : 0)}
-          />
         </>
       ) : (
         <p className="empty-message">✅ No tasks currently assigned. Great job!</p>

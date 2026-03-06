@@ -263,6 +263,7 @@
     <module>crp-flowable-assert</module>
     <module>crp-flowable-ai</module>
     <module>crp-flowable-ui</module>
+    <module>crp-flowable-form</module>
     <module>crp-flowable-ex-bom</module>
   </modules>
 </project>

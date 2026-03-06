@@ -22,38 +22,26 @@ function PaginationControls({ currentCount, totalAvailable }) {
     <div className="pagination-controls" role="navigation" aria-label="Pagination">
       <div className="pagination-info">
         <span role="status" aria-live="polite">
-          Showing {currentCount} of {totalAvailable} items
+          {currentCount}/
+              <div className="pagination-actions">
+                <select
+                  id="limit-select"
+                  value={taskLimit}
+                  onChange={handleLimitChange}
+                  className="limit-select"
+                  aria-label="Number of items to display per page"
+                >
+                  {limitOptions.map(limit => (
+                    <option key={limit} value={limit}>
+                      {limit}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              items
         </span>
       </div>
 
-      <div className="pagination-actions">
-        <label htmlFor="limit-select" className="limit-label">
-          Items per page:
-        </label>
-        <select
-          id="limit-select"
-          value={taskLimit}
-          onChange={handleLimitChange}
-          className="limit-select"
-          aria-label="Number of items to display per page"
-        >
-          {limitOptions.map(limit => (
-            <option key={limit} value={limit}>
-              {limit}
-            </option>
-          ))}
-        </select>
-
-        {canLoadMore && (
-          <button
-            className="btn-load-more"
-            disabled={!canLoadMore}
-            aria-label={`Load more items (currently showing ${currentCount})`}
-          >
-            📥 Load More ({totalAvailable - currentCount} remaining)
-          </button>
-        )}
-      </div>
     </div>
   )
 }
