@@ -63,6 +63,7 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
+      <version>${junit.jupiter.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
@@ -262,6 +263,8 @@
     <module>crp-bpm-sonarqube-plugin</module>
     <module>crp-flowable-assert</module>
     <module>crp-flowable-ai</module>
+    <module>crp-flowable-ui</module>
+    <module>crp-flowable-form</module>
     <module>crp-flowable-ex-bom</module>
     <module>crp-flowable-mcp</module>
   </modules>
