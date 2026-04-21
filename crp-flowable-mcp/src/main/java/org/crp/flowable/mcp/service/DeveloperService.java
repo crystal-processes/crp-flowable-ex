@@ -38,7 +38,7 @@ public class DeveloperService {
     @Tool(description = """
     Provides list of variables per process definition limited by types. Usual complex variable types are:
     bytes, serializable, longString, jpa-entity-list.
-    Input parametersused to limit query only to: 
+    Input parameters used to limit query only to:
     processDefinitionKey
     types - collection of types
     

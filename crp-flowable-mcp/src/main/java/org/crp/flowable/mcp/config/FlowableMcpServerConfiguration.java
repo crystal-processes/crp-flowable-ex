@@ -37,7 +37,7 @@ public class FlowableMcpServerConfiguration {
     }
 
     @Bean
-    public DeveloperService developerService(SqlSessionFactory sqlSessionFactory) throws Exception {
+    public DeveloperService developerService(SqlSessionFactory sqlSessionFactory) {
         return new DeveloperService(sqlSessionFactory);
     }
 
