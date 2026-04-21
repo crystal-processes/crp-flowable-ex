@@ -1,5 +1,6 @@
 package org.crp.flowable.mcp.service;
 
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.ai.tool.annotation.Tool;
@@ -8,6 +9,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -29,10 +31,14 @@ public class DeveloperService {
     """)
     public String maxVariablesPerProcessDefinition() {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            return sqlSession.selectList("findMaxVariablesPerProcessDefinition").toString();
+            return getSelectList(sqlSession, "findMaxVariablesPerProcessDefinition", null).toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static List<Object> getSelectList(SqlSession sqlSession, String statement, Object params) {
+        return sqlSession.selectList(statement, params, new RowBounds(0, 50));
     }
 
     @Tool(description = """
@@ -52,12 +58,10 @@ public class DeveloperService {
     """)
     public String variableTypes(String processDefinitionKey, Collection<String> types) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            return sqlSession.selectList("findVariableByTypes",
-                    ParametersBuilder.create()
-                            .add("processDefinitionKey", processDefinitionKey)
-                            .add("types", types)
-                            .build()
-                    )
+            return getSelectList(sqlSession, "findVariableByTypes", ParametersBuilder.create()
+                    .add("processDefinitionKey", processDefinitionKey)
+                    .add("types", types)
+                    .build())
                     .toString();
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Properties;
 
-@ConditionalOnProperty(name = "crp.flowable.mcp.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "crp.flowable.mcp.enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfiguration
 @EnableConfigurationProperties({
         FlowableMcpProperties.class

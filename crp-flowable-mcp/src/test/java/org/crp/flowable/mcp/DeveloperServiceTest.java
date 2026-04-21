@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.crp.flowable.mcp.test.CrpMcpTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collection;
 import java.util.Set;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@CrpMcpTest
 public class DeveloperServiceTest {
 
     @Autowired
@@ -34,6 +34,7 @@ public class DeveloperServiceTest {
 
     @Autowired
     private DeveloperService developerService;
+
     private Deployment deployment;
 
     @BeforeEach

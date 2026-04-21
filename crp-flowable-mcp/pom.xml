@@ -30,6 +30,12 @@
             <version>3.0.5</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.flowable</groupId>
@@ -49,12 +55,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>2.2.224</version>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
@@ -63,9 +63,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
                 <configuration>
                     <mainClass>org.crp.flowable.mcp.FlowableMpcServerApplication</mainClass>
                     <layout>ZIP</layout>
+                    <includes>
+                        <dependency>
+                            <groupId>org.mybatis.spring.boot</groupId>
+                            <artifactId>mybatis-spring-boot-starter</artifactId>
+                            <version>${spring.boot.version}</version>
+                        </dependency>
+
+                    </includes>
                 </configuration>
                 <executions>
                     <execution>
