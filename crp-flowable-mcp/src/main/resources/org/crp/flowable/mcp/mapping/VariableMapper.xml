@@ -12,6 +12,9 @@
         FROM act_hi_varinst as var
         LEFT JOIN act_hi_procinst as prc ON var.proc_inst_id_ = prc.id_
         LEFT JOIN act_re_procdef as def ON prc.proc_def_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN act_re_deployment as dep ON def.deployment_id_ = dep.id_
+        </if>
         <where>
             <if test="processDefinitionKey != null">
                 AND def.key_ = #{processDefinitionKey}
@@ -19,6 +22,16 @@
             <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")" nullable="true">
                 #{type}
             </foreach>
+            <if test="startedAfter != null">
+                AND prc.start_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                    SELECT id_ FROM act_re_deployment 
+                    ORDER BY deploy_time_ DESC 
+                    LIMIT #{latestDeployments}
+                )
+            </if>
         </where>
         GROUP BY prc.id_, prc.proc_def_id_, def.key_, var.name_, var.var_type_
     </select>
@@ -37,6 +50,21 @@
             FROM act_hi_varinst as var
             LEFT JOIN act_hi_procinst as prc ON var.proc_inst_id_ = prc.id_
             LEFT JOIN act_re_procdef as def ON prc.proc_def_id_ = def.id_
+            <if test="latestDeployments != null and latestDeployments > 0">
+                LEFT JOIN act_re_deployment as dep ON def.deployment_id_ = dep.id_
+            </if>
+            <where>
+                <if test="startedAfter != null">
+                    AND prc.start_time_ >= #{startedAfter}
+                </if>
+                <if test="latestDeployments != null and latestDeployments > 0">
+                    AND def.deployment_id_ IN (
+                        SELECT id_ FROM act_re_deployment 
+                        ORDER BY deploy_time_ DESC 
+                        LIMIT #{latestDeployments}
+                    )
+                </if>
+            </where>
             GROUP BY prc.id_, prc.proc_def_id_, def.key_
         ) as proc_def_count
         GROUP BY def_id_, key_

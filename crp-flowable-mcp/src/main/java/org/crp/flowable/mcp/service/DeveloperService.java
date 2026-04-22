@@ -7,6 +7,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +28,18 @@ public class DeveloperService {
     key_ - process definition key matches with the process model id in the bpmn file,
     var_count_ - maximum count of variables per the process instance. Too many variables can indicate design issue.
     
+    Input parameters used to limit query only to:
+    startedAfter - Instant representing the minimum start time for process instances (inclusive)
+    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments, 1 latest)
+    
     The problem could be that process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String maxVariablesPerProcessDefinition() {
+    public String maxVariablesPerProcessDefinition(Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            return getSelectList(sqlSession, "findMaxVariablesPerProcessDefinition", null).toString();
+            return getSelectList(sqlSession, "findMaxVariablesPerProcessDefinition", ParametersBuilder.create()
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build()).toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -47,6 +55,8 @@ public class DeveloperService {
     Input parameters used to limit query only to:
     processDefinitionKey
     types - collection of types
+    startedAfter - Instant representing the minimum start time for process instances (inclusive)
+    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
     
     The method returns array of:
     id_ - process instance,
@@ -56,11 +66,13 @@ public class DeveloperService {
     
     The problem could be that process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String variableTypes(String processDefinitionKey, Collection<String> types) {
+    public String variableTypes(String processDefinitionKey, Collection<String> types, Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findVariableByTypes", ParametersBuilder.create()
                     .add("processDefinitionKey", processDefinitionKey)
                     .add("types", types)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
                     .build())
                     .toString();
         } catch (Exception e) {
