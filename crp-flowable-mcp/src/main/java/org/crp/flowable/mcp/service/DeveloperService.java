@@ -22,7 +22,6 @@ public class DeveloperService {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
-    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides maximum variable count per process instance. Returns
     def_id_ - deployed definition id,
@@ -30,14 +29,17 @@ public class DeveloperService {
     var_count_ - maximum count of variables per the process instance. Too many variables can indicate design issue.
     
     Input parameters used to limit query only to:
+    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
+                    model id.
     startedAfter - Instant representing the minimum start time for process instances (inclusive)
     latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments, 1 latest)
     
     The problem could be that process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String maxVariablesPerProcessDefinition(Instant startedAfter, Integer latestDeployments) {
+    public String maxVariablesPerProcessDefinition(String definitionKey, Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findMaxVariablesPerProcessDefinition", ParametersBuilder.create()
+                    .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
                     .build()).toString();
@@ -50,12 +52,12 @@ public class DeveloperService {
         return sqlSession.selectList(statement, params, new RowBounds(0, 50));
     }
 
-    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of variables per process definition limited by types. Usual complex variable types are:
     bytes, serializable, longString, jpa-entity-list.
     Input parameters used to limit query only to:
-    processDefinitionKey
+    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
+                    model id.
     types - collection of types
     startedAfter - Instant representing the minimum start time for process instances (inclusive)
     latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
@@ -68,10 +70,10 @@ public class DeveloperService {
     
     The problem could be that process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String variableTypes(String processDefinitionKey, Collection<String> types, Instant startedAfter, Integer latestDeployments) {
+    public String variableTypes(String definitionKey, Collection<String> types, Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findVariableByTypes", ParametersBuilder.create()
-                    .add("processDefinitionKey", processDefinitionKey)
+                    .add("definitionKey", definitionKey)
                     .add("types", types)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
@@ -100,15 +102,18 @@ public class DeveloperService {
     Jobs are ordered by create_time_ DESC (newest first).
     
     Input parameters used to limit query only to:
+    definitionKey - String representing the process definition key to filter by (optional)  definitionKey maps to process
+                    model id.
     startedAfter - Instant representing the minimum job creation time (inclusive)
     latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
     
     DeadLetter job indicates a serious problem in the execution, which needs immediate attention.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String deadLetterJobs(Instant startedAfter, Integer latestDeployments) {
+    public String deadLetterJobs(String definitionKey, Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findDeadLetterJobs", ParametersBuilder.create()
+                    .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
                     .build()).toString();
@@ -117,7 +122,6 @@ public class DeveloperService {
         }
     }
 
-    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
     Returns information about failing jobs including:
@@ -137,6 +141,8 @@ public class DeveloperService {
     Only jobs with exception_msg_ (failed jobs) are returned.
     
     Input parameters used to limit query only to:
+    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
+                    model id.
     startedAfter - Instant representing the minimum job creation time (inclusive)
     latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
     
@@ -144,9 +150,10 @@ public class DeveloperService {
     However, persistent failures suggest underlying issues that need investigation.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String failingRuntimeJobs(Instant startedAfter, Integer latestDeployments) {
+    public String failingRuntimeJobs(String definitionKey, Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findFailingRuntimeJobs", ParametersBuilder.create()
+                    .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
                     .build()).toString();

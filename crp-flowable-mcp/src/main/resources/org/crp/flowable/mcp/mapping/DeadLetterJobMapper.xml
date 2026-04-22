@@ -20,6 +20,9 @@
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
         </if>
         <where>
+            <if test="definitionKey != null">
+                AND def.key_ = #{definitionKey}
+            </if>
             <if test="startedAfter != null">
                 AND job.create_time_ >= #{startedAfter}
             </if>
@@ -54,6 +57,9 @@
         </if>
         <where>
             AND job.exception_msg_ IS NOT NULL
+            <if test="definitionKey != null">
+                AND def.key_ = #{definitionKey}
+            </if>
             <if test="startedAfter != null">
                 AND job.create_time_ >= #{startedAfter}
             </if>

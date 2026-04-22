@@ -16,8 +16,8 @@
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
         </if>
         <where>
-            <if test="processDefinitionKey != null">
-                AND def.key_ = #{processDefinitionKey}
+            <if test="definitionKey != null">
+                AND def.key_ = #{definitionKey}
             </if>
             <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")" nullable="true">
                 #{type}
@@ -54,6 +54,9 @@
                 LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
             </if>
             <where>
+                <if test="definitionKey != null">
+                    AND def.key_ = #{definitionKey}
+                </if>
                 <if test="startedAfter != null">
                     AND prc.start_time_ >= #{startedAfter}
                 </if>
