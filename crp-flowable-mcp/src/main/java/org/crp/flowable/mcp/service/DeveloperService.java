@@ -97,14 +97,16 @@ public class DeveloperService {
     Jobs are ordered by create_time_ DESC (newest first).
     
     Input parameters used to limit query only to:
+    startedAfter - Instant representing the minimum job creation time (inclusive)
     latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
     
     DeadLetter job indicates a serious problem in the execution, which needs immediate attention.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String deadLetterJobs(Integer latestDeployments) {
+    public String deadLetterJobs(Instant startedAfter, Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findDeadLetterJobs", ParametersBuilder.create()
+                    .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
                     .build()).toString();
         } catch (Exception e) {

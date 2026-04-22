@@ -234,14 +234,14 @@ public class DeveloperServiceTest {
                 10_000, 500L,
                 () -> managementService.createDeadLetterJobQuery().processInstanceId(processInstance.getId()).count() > 0);
 
-        String result = developerService.deadLetterJobs(null);
+        String result = developerService.deadLetterJobs(null, null);
 
         assertThat(result)
                 .as("deadLetterJobs returns dead letter job information")
                 .contains("KEY_=failingServiceTask")
                 .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
 
-        String resultWithFilter = developerService.deadLetterJobs(1);
+        String resultWithFilter = developerService.deadLetterJobs(null, 1);
 
         assertThat(resultWithFilter)
                 .as("deadLetterJobs with latestDeployments=1 returns filtered results")
@@ -272,28 +272,28 @@ public class DeveloperServiceTest {
                     () -> managementService.createDeadLetterJobQuery().processInstanceId(newProcessInstance.getId()).count() > 0
             && managementService.createDeadLetterJobQuery().processInstanceId(oldProcessInstance.getId()).count() > 0);
 
-            String resultLatest1 = developerService.deadLetterJobs(1);
+            String resultLatest1 = developerService.deadLetterJobs(null, 1);
 
             assertThat(resultLatest1)
                     .as("deadLetterJobs with latestDeployments=1 includes only newest deployment")
                     .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId())
                     .doesNotContain("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId());
 
-            String resultLatest2 = developerService.deadLetterJobs(2);
+            String resultLatest2 = developerService.deadLetterJobs(null, 2);
 
             assertThat(resultLatest2)
                     .as("deadLetterJobs with latestDeployments=2 includes both deployments")
                     .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
                     .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
 
-            String resultLatest0 = developerService.deadLetterJobs(0);
+            String resultLatest0 = developerService.deadLetterJobs(null, 0);
 
             assertThat(resultLatest0)
                     .as("deadLetterJobs with latestDeployments=0 includes all deployments")
                     .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
                     .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
 
-            String resultNull = developerService.deadLetterJobs(null);
+            String resultNull = developerService.deadLetterJobs(null, null);
 
             assertThat(resultNull)
                     .as("deadLetterJobs with null latestDeployments includes all deployments")
@@ -303,6 +303,35 @@ public class DeveloperServiceTest {
         } finally {
             repositoryService.deleteDeployment(newDeployment.getId(), true);
         }
+    }
+
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void deadLetterJobsWithStartedAfterTest() {
+        Instant beforeJobCreation = Instant.now().minusMillis(1L);
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                10_000, 500L,
+                () -> managementService.createDeadLetterJobQuery().processInstanceId(processInstance.getId()).count() > 0);
+
+        Instant afterJobCreation = Instant.now().plusMillis(1L);
+
+        assertThat(developerService.deadLetterJobs(beforeJobCreation, null))
+                .as("startedAfter before job creation includes the dead letter job")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
+
+        assertThat(developerService.deadLetterJobs(afterJobCreation, null))
+                .as("startedAfter after job creation excludes the dead letter job")
+                .contains("[]");
+
+        assertThat(developerService.deadLetterJobs(null, null))
+                .as("null startedAfter includes all dead letter jobs")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
     }
 
     private static Stream<Arguments> variableTestCases() {

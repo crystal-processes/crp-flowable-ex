@@ -20,6 +20,9 @@
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
         </if>
         <where>
+            <if test="startedAfter != null">
+                AND job.create_time_ >= #{startedAfter}
+            </if>
             <if test="latestDeployments != null and latestDeployments > 0">
                 AND def.deployment_id_ IN (
                     SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
