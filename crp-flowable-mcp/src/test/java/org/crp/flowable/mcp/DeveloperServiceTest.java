@@ -2,14 +2,18 @@ package org.crp.flowable.mcp;
 
 import org.crp.flowable.mcp.service.DeveloperService;
 import org.crp.flowable.mcp.test.CrpMcpTest;
+import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
+import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.flowable.engine.impl.test.JobTestHelper;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,12 +38,22 @@ public class DeveloperServiceTest {
     @Autowired
     private DeveloperService developerService;
 
+    @Autowired
+    private ManagementService managementService;
+
+    @Autowired
+    private ProcessEngineConfigurationImpl processEngineConfiguration;
+
     private Deployment deployment;
 
     @BeforeEach
     void deployOneTaskProcess() {
-        deployment = repositoryService.createDeployment().addClasspathResource("oneTask.bpmn20.xml").deploy();
+        deployment = repositoryService.createDeployment()
+                .addClasspathResource("oneTask.bpmn20.xml")
+                .addClasspathResource("failingServiceTask.bpmn20.xml")
+                .deploy();
     }
+
     @AfterEach
     void deleteDeployment() {
         repositoryService.deleteDeployment(deployment.getId(), true);
@@ -106,7 +120,7 @@ public class DeveloperServiceTest {
                 .contains("KEY_=oneTask");
     }
 
-    @ParameterizedTest(name ="{1} + {2} => {3}")
+    @ParameterizedTest(name = "{1} + {2} => {3}")
     @MethodSource("variableTestCases")
     public void findVariables(String description, String processDefinitionKey, Set<String> types, Collection<String> expectedResult) {
         runtimeService.createProcessInstanceBuilder().processDefinitionKey("oneTask")
@@ -203,6 +217,88 @@ public class DeveloperServiceTest {
             assertThat(developerService.variableTypes(null, null, null, null))
                     .as("null latestDeployments includes all deployments")
                     .contains("TYPE_=string", "NAME_=oldVariable", "TYPE_=integer", "NAME_=newVariable", "KEY_=oneTask");
+
+        } finally {
+            repositoryService.deleteDeployment(newDeployment.getId(), true);
+        }
+    }
+
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void deadLetterJobsTest() {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                10_000, 500L,
+                () -> managementService.createDeadLetterJobQuery().processInstanceId(processInstance.getId()).count() > 0);
+
+        String result = developerService.deadLetterJobs(null);
+
+        assertThat(result)
+                .as("deadLetterJobs returns dead letter job information")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
+
+        String resultWithFilter = developerService.deadLetterJobs(1);
+
+        assertThat(resultWithFilter)
+                .as("deadLetterJobs with latestDeployments=1 returns filtered results")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
+    }
+
+    @Test
+    public void deadLetterJobsWithMultipleDeploymentsTest() {
+        // Create dead letter job on old deployment
+        ProcessInstance oldProcessInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .start();
+
+        // Create new deployment of the same process
+        Deployment newDeployment = repositoryService.createDeployment()
+                .addClasspathResource("failingServiceTask.bpmn20.xml")
+                .deploy();
+
+        try {
+            // Create dead letter job on new deployment
+            ProcessInstance newProcessInstance = runtimeService.createProcessInstanceBuilder()
+                    .processDefinitionKey("failingServiceTask")
+                    .start();
+
+            JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                    10_000, 500L,
+                    () -> managementService.createDeadLetterJobQuery().processInstanceId(newProcessInstance.getId()).count() > 0
+            && managementService.createDeadLetterJobQuery().processInstanceId(oldProcessInstance.getId()).count() > 0);
+
+            String resultLatest1 = developerService.deadLetterJobs(1);
+
+            assertThat(resultLatest1)
+                    .as("deadLetterJobs with latestDeployments=1 includes only newest deployment")
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId())
+                    .doesNotContain("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId());
+
+            String resultLatest2 = developerService.deadLetterJobs(2);
+
+            assertThat(resultLatest2)
+                    .as("deadLetterJobs with latestDeployments=2 includes both deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
+
+            String resultLatest0 = developerService.deadLetterJobs(0);
+
+            assertThat(resultLatest0)
+                    .as("deadLetterJobs with latestDeployments=0 includes all deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
+
+            String resultNull = developerService.deadLetterJobs(null);
+
+            assertThat(resultNull)
+                    .as("deadLetterJobs with null latestDeployments includes all deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
 
         } finally {
             repositoryService.deleteDeployment(newDeployment.getId(), true);

@@ -80,6 +80,38 @@ public class DeveloperService {
         }
     }
 
+    @Tool(description = """
+    Provides list of dead letter jobs. Dead letter jobs are failed jobs that have exhausted all retries.
+    Returns information about failed jobs including:
+    id_ - job ID,
+    type_ - job type,
+    handler_type_ - job handler type,
+    handler_config_ - job handler configuration,
+    exception_message_ - exception message from the last failure,
+    create_time_ - when the job was created,
+    element_id_ - BPMN element ID where the job failed,
+    process_instance_id_ - ID of the process instance,
+    proc_def_id_ - process definition ID,
+    key_ - process definition key associated with the process model.
+    
+    Jobs are ordered by create_time_ DESC (newest first).
+    
+    Input parameters used to limit query only to:
+    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
+    
+    DeadLetter job indicates a serious problem in the execution, which needs immediate attention.
+    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
+    """)
+    public String deadLetterJobs(Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findDeadLetterJobs", ParametersBuilder.create()
+                    .add("latestDeployments", latestDeployments)
+                    .build()).toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static class ParametersBuilder {
         Map<String, Object> parameters;
 
