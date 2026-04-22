@@ -10,7 +10,7 @@
                      flowable:async="true"
                      flowable:exclusive="true">
             <extensionElements>
-                <flowable:failedJobRetryTimeCycle>R1/PT1S</flowable:failedJobRetryTimeCycle>
+                <flowable:failedJobRetryTimeCycle>${failedJobRetryTimeCycle}</flowable:failedJobRetryTimeCycle>
             </extensionElements>
         </serviceTask>
         <endEvent id="endEvent" name="End"/>

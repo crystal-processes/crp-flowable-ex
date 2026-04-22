@@ -228,6 +228,7 @@ public class DeveloperServiceTest {
     public void deadLetterJobsTest() {
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
                 .start();
 
         JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
@@ -251,20 +252,19 @@ public class DeveloperServiceTest {
 
     @Test
     public void deadLetterJobsWithMultipleDeploymentsTest() {
-        // Create dead letter job on old deployment
         ProcessInstance oldProcessInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
                 .start();
 
-        // Create new deployment of the same process
         Deployment newDeployment = repositoryService.createDeployment()
                 .addClasspathResource("failingServiceTask.bpmn20.xml")
                 .deploy();
 
         try {
-            // Create dead letter job on new deployment
             ProcessInstance newProcessInstance = runtimeService.createProcessInstanceBuilder()
                     .processDefinitionKey("failingServiceTask")
+                    .variable("failedJobRetryTimeCycle", "R1/PT1S")
                     .start();
 
             JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
@@ -311,6 +311,7 @@ public class DeveloperServiceTest {
         Instant beforeJobCreation = Instant.now().minusMillis(1L);
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
                 .start();
 
         JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
@@ -332,6 +333,139 @@ public class DeveloperServiceTest {
                 .as("null startedAfter includes all dead letter jobs")
                 .contains("KEY_=failingServiceTask")
                 .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
+    }
+
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void failingRuntimeJobsTest() {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R100/PT5M")
+                .start();
+
+        // Wait for the job to be created and fail (but not become a dead letter yet)
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                5_000, 500L,
+                () -> managementService.createTimerJobQuery()
+                        .processInstanceId(processInstance.getId())
+                        .withException()
+                        .count() > 0);
+
+        String result = developerService.failingRuntimeJobs(null, null);
+
+        assertThat(result)
+                .as("failingRuntimeJobs returns failing runtime job information")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId())
+                .contains("RETRIES_=");
+    }
+
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void failingRuntimeJobsWithStartedAfterTest() {
+        Instant beforeJobCreation = Instant.now().minusMillis(1L);
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R100/PT5M")
+                .start();
+
+        // Wait for the job to be created and fail
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                5_000, 500L,
+                () -> managementService.createTimerJobQuery()
+                        .processInstanceId(processInstance.getId())
+                        .withException()
+                        .count() > 0);
+
+        Instant afterJobCreation = Instant.now().plusMillis(1L);
+
+        assertThat(developerService.failingRuntimeJobs(beforeJobCreation, null))
+                .as("startedAfter before job creation includes the failing runtime job")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId())
+                .contains("RETRIES_=");
+
+        assertThat(developerService.failingRuntimeJobs(afterJobCreation, null))
+                .as("startedAfter after job creation excludes the failing runtime job")
+                .contains("[]");
+
+        assertThat(developerService.failingRuntimeJobs(null, null))
+                .as("null startedAfter includes all failing runtime jobs")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId())
+                .contains("RETRIES_=");
+    }
+
+    @Test
+    public void failingRuntimeJobsWithMultipleDeploymentsTest() {
+        ProcessInstance oldProcessInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R100/PT5M")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                5_000, 500L,
+                () -> managementService.createTimerJobQuery()
+                        .processInstanceId(oldProcessInstance.getId())
+                        .withException()
+                        .count() > 0);
+
+        Deployment newDeployment = repositoryService.createDeployment()
+                .addClasspathResource("failingServiceTask.bpmn20.xml")
+                .deploy();
+
+        try {
+            ProcessInstance newProcessInstance = runtimeService.createProcessInstanceBuilder()
+                    .processDefinitionKey("failingServiceTask")
+                    .variable("failedJobRetryTimeCycle", "R100/PT5M")
+                    .start();
+
+            JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                    5_000, 500L,
+                    () -> managementService.createTimerJobQuery()
+                            .processInstanceId(newProcessInstance.getId())
+                            .withException()
+                            .count() > 0
+                    && managementService.createTimerJobQuery()
+                            .processInstanceId(oldProcessInstance.getId())
+                            .withException()
+                            .count() > 0);
+
+            // Test with latestDeployments=1 - should only include new deployment
+            String resultLatest1 = developerService.failingRuntimeJobs(null, 1);
+
+            assertThat(resultLatest1)
+                    .as("failingRuntimeJobs with latestDeployments=1 includes only newest deployment")
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId())
+                    .doesNotContain("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId());
+
+            // Test with latestDeployments=2 - should include both deployments
+            String resultLatest2 = developerService.failingRuntimeJobs(null, 2);
+
+            assertThat(resultLatest2)
+                    .as("failingRuntimeJobs with latestDeployments=2 includes both deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
+
+            // Test with latestDeployments=0 - should include all deployments like null
+            String resultLatest0 = developerService.failingRuntimeJobs(null, 0);
+
+            assertThat(resultLatest0)
+                    .as("failingRuntimeJobs with latestDeployments=0 includes all deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
+
+            // Test with null latestDeployments - should include all deployments
+            String resultNull = developerService.failingRuntimeJobs(null, null);
+
+            assertThat(resultNull)
+                    .as("failingRuntimeJobs with null latestDeployments includes all deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
+
+        } finally {
+            repositoryService.deleteDeployment(newDeployment.getId(), true);
+        }
     }
 
     private static Stream<Arguments> variableTestCases() {

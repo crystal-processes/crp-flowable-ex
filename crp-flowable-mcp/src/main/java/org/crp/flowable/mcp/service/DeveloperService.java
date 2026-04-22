@@ -114,6 +114,43 @@ public class DeveloperService {
         }
     }
 
+    @Tool(description = """
+    Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
+    Returns information about failing jobs including:
+    id_ - job ID,
+    type_ - job type,
+    handler_type_ - job handler type,
+    handler_config_ - job handler configuration,
+    retries_ - number of retries remaining,
+    exception_message_ - exception message from the last failure,
+    create_time_ - when the job was created,
+    element_id_ - BPMN element ID where the job failed,
+    process_instance_id_ - ID of the process instance,
+    proc_def_id_ - process definition ID,
+    key_ - process definition key associated with the process model.
+    
+    Jobs are ordered by create_time_ DESC (newest first).
+    Only jobs with exception_msg_ (failed jobs) are returned.
+    
+    Input parameters used to limit query only to:
+    startedAfter - Instant representing the minimum job creation time (inclusive)
+    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
+    
+    Failing runtime jobs indicate ongoing execution problems that may resolve automatically through retries.
+    However, persistent failures suggest underlying issues that need investigation.
+    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
+    """)
+    public String failingRuntimeJobs(Instant startedAfter, Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findFailingRuntimeJobs", ParametersBuilder.create()
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build()).toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static class ParametersBuilder {
         Map<String, Object> parameters;
 
