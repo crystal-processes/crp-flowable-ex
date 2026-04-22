@@ -32,9 +32,6 @@ public class DeveloperServiceTest {
     private RepositoryService repositoryService;
 
     @Autowired
-    private TaskService taskService;
-
-    @Autowired
     private DeveloperService developerService;
 
     private Deployment deployment;

@@ -23,7 +23,7 @@ public class DeveloperService {
     }
 
     @Tool(description = """
-    Provides maximum variable count per process instance. Returns 
+    Provides maximum variable count per process instance. Returns
     def_id_ - deployed definition id,
     key_ - process definition key matches with the process model id in the bpmn file,
     var_count_ - maximum count of variables per the process instance. Too many variables can indicate design issue.
