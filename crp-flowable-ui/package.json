@@ -1,7 +1,7 @@
 {
   "name": "crp-flowable-ui",
   "private": true,
-  "version": "0.0.8",
+  "version": "0.0.9-SNAPSHOT",
   "type": "module",
   "scripts": {
     "dev": "vite --debug",

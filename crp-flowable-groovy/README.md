@@ -19,7 +19,7 @@ Add `crp-flowable-groovy` dependency to your project:
 			<scope>test</scope>
 		</dependency>
 ```
-Where `${crp-flowable-ex.version} >= 0.0.8-SNAPSHOT`. The scope depends on the script usage. 
+Where `${crp-flowable-ex.version} >= 0.0.9-SNAPSHOT`. The scope depends on the script usage. 
 
 Add following resolver to [process](https://github.com/crystal-processes/crp-flowable-ex/blob/3c9cdd10fd81fc3ddfa8c550db95c842a521c8ab/crp-flowable-groovy/src/test/resources/flowable.cfg.xml#L55-L59)
 and [cmmn engine](https://github.com/crystal-processes/crp-flowable-ex/blob/3c9cdd10fd81fc3ddfa8c550db95c842a521c8ab/crp-flowable-groovy/src/test/resources/flowable.cmmn.cfg.xml#L24-L28)

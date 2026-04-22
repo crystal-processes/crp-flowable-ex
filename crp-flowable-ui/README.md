@@ -64,7 +64,7 @@ The built frontend is automatically packaged as a JAR module that can be include
 <dependency>
   <groupId>io.github.crystal-processes</groupId>
   <artifactId>crp-flowable-ui</artifactId>
-  <version>0.0.8-SNAPSHOT</version>
+  <version>0.0.9-SNAPSHOT-SNAPSHOT</version>
 </dependency>
 ```
 
