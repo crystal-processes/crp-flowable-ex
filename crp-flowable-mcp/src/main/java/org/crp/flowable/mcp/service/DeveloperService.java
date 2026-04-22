@@ -22,6 +22,7 @@ public class DeveloperService {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
+    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides maximum variable count per process instance. Returns
     def_id_ - deployed definition id,
@@ -49,6 +50,7 @@ public class DeveloperService {
         return sqlSession.selectList(statement, params, new RowBounds(0, 50));
     }
 
+    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of variables per process definition limited by types. Usual complex variable types are:
     bytes, serializable, longString, jpa-entity-list.
@@ -80,6 +82,7 @@ public class DeveloperService {
         }
     }
 
+    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of dead letter jobs. Dead letter jobs are failed jobs that have exhausted all retries.
     Returns information about failed jobs including:
@@ -114,6 +117,7 @@ public class DeveloperService {
         }
     }
 
+    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
     Returns information about failing jobs including:

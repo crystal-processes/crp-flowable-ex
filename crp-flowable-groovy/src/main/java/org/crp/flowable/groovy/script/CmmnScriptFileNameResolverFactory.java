@@ -34,9 +34,10 @@ public class CmmnScriptFileNameResolverFactory implements ResolverFactory {
     }
 
     @Override
-    public Resolver createResolver(AbstractEngineConfiguration engineConfiguration, VariableContainer variableContainer) {
-        return new CmmnScriptFileNameResolver(variableContainer);
+    public Resolver createResolver(AbstractEngineConfiguration engineConfiguration, VariableContainer scopeContainer, VariableContainer inputVariableContainer) {
+        return scopeContainer != null ? new CmmnScriptFileNameResolver(scopeContainer) : null;
     }
+
 
 
     private class CmmnScriptFileNameResolver extends AbstractScriptFileNameResolver {

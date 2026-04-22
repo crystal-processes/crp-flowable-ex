@@ -11,7 +11,11 @@
 
     <artifactId>crp-flowable-mcp</artifactId>
 
-    <name>crp-flowable-mpc</name>
+    <name>crp-flowable-mcp</name>
+    <description>Flowable open source MCP Server - MCP implementation from crystal processes</description>
+    <properties>
+        <mybatis.version>3.0.5</mybatis.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -27,7 +31,7 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>3.0.5</version>
+            <version>${mybatis.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -74,12 +78,10 @@
                     <mainClass>org.crp.flowable.mcp.FlowableMpcServerApplication</mainClass>
                     <layout>ZIP</layout>
                     <includes>
-                        <dependency>
+                        <include>
                             <groupId>org.mybatis.spring.boot</groupId>
                             <artifactId>mybatis-spring-boot-starter</artifactId>
-                            <version>${spring.boot.version}</version>
-                        </dependency>
-
+                        </include>
                     </includes>
                 </configuration>
                 <executions>

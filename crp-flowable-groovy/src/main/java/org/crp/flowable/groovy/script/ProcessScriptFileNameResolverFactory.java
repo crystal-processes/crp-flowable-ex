@@ -40,8 +40,8 @@ public class ProcessScriptFileNameResolverFactory implements ResolverFactory {
     }
 
     @Override
-    public Resolver createResolver(AbstractEngineConfiguration engineConfiguration, VariableContainer variableContainer) {
-        return new ProcessScriptFileNameResolver(variableContainer);
+    public Resolver createResolver(AbstractEngineConfiguration engineConfiguration, VariableContainer scopeContainer, VariableContainer inputVariableContainer) {
+        return scopeContainer != null ? new ProcessScriptFileNameResolver(scopeContainer) : null;
     }
 
 

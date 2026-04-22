@@ -12,8 +12,6 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -224,7 +222,6 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    @Execution(ExecutionMode.CONCURRENT)
     public void deadLetterJobsTest() {
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
@@ -306,7 +303,6 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    @Execution(ExecutionMode.CONCURRENT)
     public void deadLetterJobsWithStartedAfterTest() {
         Instant beforeJobCreation = Instant.now().minusMillis(1L);
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
@@ -336,7 +332,6 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    @Execution(ExecutionMode.CONCURRENT)
     public void failingRuntimeJobsTest() {
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
@@ -361,7 +356,6 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    @Execution(ExecutionMode.CONCURRENT)
     public void failingRuntimeJobsWithStartedAfterTest() {
         Instant beforeJobCreation = Instant.now().minusMillis(1L);
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()

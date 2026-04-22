@@ -40,9 +40,9 @@
     <java.version>17</java.version>
     <java.release>17</java.release>
 
-    <flowable.version>7.1.0</flowable.version>
+    <flowable.version>7.2.0</flowable.version>
     <spring.boot.version>3.5.11</spring.boot.version>
-    <spring.framework.version>6.1.13</spring.framework.version>
+    <spring.framework.version>6.2.10</spring.framework.version>
     <spring.ai.version>1.1.4</spring.ai.version>
     <groovy.version>4.0.26</groovy.version>
     <junit.jupiter.version>5.12.1</junit.jupiter.version>
