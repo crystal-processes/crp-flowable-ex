@@ -41,8 +41,9 @@
     <java.release>17</java.release>
 
     <flowable.version>7.1.0</flowable.version>
-    <spring.boot.version>3.3.4</spring.boot.version>
+    <spring.boot.version>3.5.11</spring.boot.version>
     <spring.framework.version>6.1.13</spring.framework.version>
+    <spring.ai.version>1.1.4</spring.ai.version>
     <groovy.version>4.0.26</groovy.version>
     <junit.jupiter.version>5.12.1</junit.jupiter.version>
     <hikari.version>3.4.2</hikari.version>
@@ -62,6 +63,7 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
+      <version>${junit.jupiter.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
@@ -261,6 +263,8 @@
     <module>crp-bpm-sonarqube-plugin</module>
     <module>crp-flowable-assert</module>
     <module>crp-flowable-ai</module>
+    <module>crp-flowable-mcp</module>
+    <module>crp-flowable-ui</module>
     <module>crp-flowable-ex-bom</module>
   </modules>
 </project>

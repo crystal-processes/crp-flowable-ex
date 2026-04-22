@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.crystal-processes</groupId>
+    <artifactId>crp-flowable-ex</artifactId>
+    <version>0.0.8-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>crp-flowable-ui</artifactId>
+  <version>0.0.8-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>crp-flowable-ui</name>
+  <description>React frontend UI for CRP Flowable applications</description>
+
+  <properties>
+    <frontend.directory>${project.basedir}</frontend.directory>
+    <nodejs.directory>${project.build.directory}/node</nodejs.directory>
+    <npm.version>10.2.3</npm.version>
+    <node.version>v18.19.0</node.version>
+    <skipLinting>true</skipLinting>
+    <skipTests>false</skipTests>
+  </properties>
+
+  <build>
+    <plugins>
+      <!-- Download Node.js and npm -->
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.14.2</version>
+        <executions>
+          <!-- Install Node.js and npm -->
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>${node.version}</nodeVersion>
+              <npmVersion>${npm.version}</npmVersion>
+              <nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>
+            </configuration>
+          </execution>
+
+          <!-- Install npm dependencies -->
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>install</arguments>
+              <workingDirectory>${frontend.directory}</workingDirectory>
+            </configuration>
+          </execution>
+
+          <!-- Run linter -->
+          <execution>
+            <id>npm run lint</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <arguments>run lint</arguments>
+              <workingDirectory>${frontend.directory}</workingDirectory>
+              <skip>${skipLinting}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Run tests -->
+          <execution>
+            <id>npm test</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <arguments>test</arguments>
+              <workingDirectory>${frontend.directory}</workingDirectory>
+              <skip>${skipTests}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Build frontend -->
+          <execution>
+            <id>npm run build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>run build</arguments>
+              <workingDirectory>${frontend.directory}</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Copy dist folder to resources for inclusion in JAR -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-frontend-dist</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${frontend.directory}/dist</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

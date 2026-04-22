@@ -1,0 +1,173 @@
+/* ============================================
+   FORM ENGINE STYLING
+   ============================================ */
+
+.form-engine-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(100, 108, 255, 0.05);
+  border: 2px solid rgba(100, 108, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.form-engine-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Loading State */
+.form-engine-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-engine-loading p {
+  font-size: 1.1em;
+  margin: 0;
+}
+
+/* Error State */
+.form-engine-error {
+  padding: 20px;
+  background: rgba(220, 80, 80, 0.1);
+  border: 2px solid rgba(220, 80, 80, 0.4);
+  border-radius: 8px;
+  color: #ff6b6b;
+}
+
+.form-engine-error h3 {
+  margin: 0 0 10px 0;
+  color: #ff6b6b;
+  font-size: 1.2em;
+}
+
+.form-engine-error p {
+  margin: 0 0 15px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95em;
+}
+
+/* Form Actions */
+.form-engine-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(100, 108, 255, 0.2);
+  justify-content: flex-end;
+}
+
+.form-engine-btn-submit,
+.form-engine-btn-cancel,
+.form-engine-btn-close {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.form-engine-btn-submit {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.form-engine-btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.form-engine-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-engine-btn-cancel,
+.form-engine-btn-close {
+  background: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  border: 1px solid rgba(100, 108, 255, 0.3);
+}
+
+.form-engine-btn-cancel:hover:not(:disabled),
+.form-engine-btn-close:hover:not(:disabled) {
+  background: rgba(100, 108, 255, 0.25);
+  border-color: #646cff;
+}
+
+.form-engine-btn-cancel:disabled,
+.form-engine-btn-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Form Content Container */
+.form-engine-form > div:not(.form-engine-actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Form Fields (Generic Styling) */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field label {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  font-size: 0.95em;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  padding: 10px 12px;
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95em;
+  transition: all 0.3s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-engine-container {
+    max-width: 100%;
+    margin: 10px;
+    padding: 15px;
+  }
+
+  .form-engine-actions {
+    flex-direction: column;
+  }
+
+  .form-engine-btn-submit,
+  .form-engine-btn-cancel,
+  .form-engine-btn-close {
+    width: 100%;
+  }
+}

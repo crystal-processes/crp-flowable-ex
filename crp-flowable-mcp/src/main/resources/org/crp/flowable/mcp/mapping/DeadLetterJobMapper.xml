@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.crp.flowable.mcp.mapper.DeadLetterJobMapper">
+    
+    <select id="findDeadLetterJobs" resultType="map">
+        SELECT 
+            job.id_ as id_,
+            job.type_ as type_,
+            job.handler_type_ as handler_type_,
+            job.handler_cfg_ as handler_cfg_,
+            job.exception_msg_ as exception_message_,
+            job.create_time_ as create_time_,
+            job.element_id_ as element_id_,
+            job.process_instance_id_ as process_instance_id_,
+            job.proc_def_id_ as proc_def_id_,
+            def.key_ as key_
+        FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
+        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        <where>
+            <if test="startedAfter != null">
+                AND job.create_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                    SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
+                    ORDER BY deploy_time_ DESC 
+                    LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        ORDER BY job.create_time_ DESC
+    </select>
+    
+    <select id="findFailingRuntimeJobs" resultType="map">
+        SELECT 
+            job.id_ as id_,
+            job.type_ as type_,
+            job.handler_type_ as handler_type_,
+            job.handler_cfg_ as handler_cfg_,
+            job.retries_ as retries_,
+            job.exception_msg_ as exception_message_,
+            job.create_time_ as create_time_,
+            job.element_id_ as element_id_,
+            job.process_instance_id_ as process_instance_id_,
+            job.proc_def_id_ as proc_def_id_,
+            def.key_ as key_
+        FROM ${prefix}ACT_RU_TIMER_JOB as job
+        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        <where>
+            AND job.exception_msg_ IS NOT NULL
+            <if test="startedAfter != null">
+                AND job.create_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                    SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
+                    ORDER BY deploy_time_ DESC 
+                    LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        ORDER BY job.create_time_ DESC
+    </select>
+    
+</mapper>

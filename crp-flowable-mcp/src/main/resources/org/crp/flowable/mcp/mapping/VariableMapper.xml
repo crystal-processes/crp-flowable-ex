@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.crp.flowable.mcp.mapper.VariableMapper">
+    
+    <select id="findVariableByTypes" resultType="map">
+        SELECT 
+            prc.id_ as id_, 
+            prc.proc_def_id_ as def_id_,
+            def.key_ as key_,
+            var.name_ as name_,
+            var.var_type_ as type_
+        FROM ${prefix}ACT_HI_VARINST as var
+        LEFT JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
+        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        <where>
+            <if test="processDefinitionKey != null">
+                AND def.key_ = #{processDefinitionKey}
+            </if>
+            <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")" nullable="true">
+                #{type}
+            </foreach>
+            <if test="startedAfter != null">
+                AND prc.start_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                    SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
+                    ORDER BY deploy_time_ DESC 
+                    LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        GROUP BY prc.id_, prc.proc_def_id_, def.key_, var.name_, var.var_type_
+    </select>
+    
+    <select id="findMaxVariablesPerProcessDefinition" resultType="map">
+        SELECT 
+            proc_def_count.def_id_, 
+            proc_def_count.key_, 
+            MAX(proc_def_count.var_count_) as max_var_count
+        FROM (
+            SELECT 
+                prc.id_, 
+                prc.proc_def_id_ as def_id_, 
+                COUNT(*) as var_count_, 
+                def.key_
+            FROM ${prefix}ACT_HI_VARINST as var
+            LEFT JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
+            LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
+            <if test="latestDeployments != null and latestDeployments > 0">
+                LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+            </if>
+            <where>
+                <if test="startedAfter != null">
+                    AND prc.start_time_ >= #{startedAfter}
+                </if>
+                <if test="latestDeployments != null and latestDeployments > 0">
+                    AND def.deployment_id_ IN (
+                        SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
+                        ORDER BY deploy_time_ DESC 
+                        LIMIT #{latestDeployments}
+                    )
+                </if>
+            </where>
+            GROUP BY prc.id_, prc.proc_def_id_, def.key_
+        ) as proc_def_count
+        GROUP BY def_id_, key_
+    </select>
+    
+</mapper>

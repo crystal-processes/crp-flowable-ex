@@ -1,0 +1,35 @@
+# Node.js
+node_modules/**
+npm-debug.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/**
+build/**
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+target/**
+.mvn/**
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output/
+/node/**
