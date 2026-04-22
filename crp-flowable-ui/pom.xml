@@ -5,12 +5,12 @@
   <parent>
     <groupId>io.github.crystal-processes</groupId>
     <artifactId>crp-flowable-ex</artifactId>
-    <version>0.0.9-SNAPSHOT</version>
+    <version>0.0.8</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>crp-flowable-ui</artifactId>
-  <version>0.0.9-SNAPSHOT</version>
+  <version>0.0.8</version>
   <packaging>jar</packaging>
 
   <name>crp-flowable-ui</name>
