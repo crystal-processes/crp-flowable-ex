@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.crp.flowable.mcp.mapper.ActivitiesMapper">
+
+    <select id="longRunningTransaction" resultType="map">
+        SELECT
+        act.act_id_ as act_id_,
+        act.act_name_ as act_name_,
+        act.transaction_order_ as transaction_order_,
+        def.key_ as key_,
+        def.id_ as proc_def_id_
+        FROM ${prefix}ACT_RU_ACTINST as act
+        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON act.proc_def_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        INNER JOIN (
+        SELECT
+        act2.proc_def_id_,
+        MAX(act2.transaction_order_) as max_transaction_order_
+        FROM ${prefix}ACT_RU_ACTINST as act2
+        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def2 ON act2.proc_def_id_ = def2.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep2 ON def2.deployment_id_ = dep2.id_
+        </if>
+        <where>
+            <if test="definitionKey != null">
+                AND def2.key_ = #{definitionKey}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def2.deployment_id_ IN (
+                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        GROUP BY act2.proc_def_id_
+        ) as max_orders ON act.proc_def_id_ = max_orders.proc_def_id_
+        AND act.transaction_order_ = max_orders.max_transaction_order_
+        <where>
+            <if test="definitionKey != null">
+                AND def.key_ = #{definitionKey}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+    </select>
+
+</mapper>

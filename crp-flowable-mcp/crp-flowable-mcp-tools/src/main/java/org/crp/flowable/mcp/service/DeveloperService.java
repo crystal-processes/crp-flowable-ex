@@ -121,7 +121,7 @@ public class DeveloperService {
         }
     }
 
-    @SuppressWarnings("javadoc")
+
     @Tool(description = """
     Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
     Returns information about failing jobs including:
@@ -155,6 +155,35 @@ public class DeveloperService {
             return getSelectList(sqlSession, "findFailingRuntimeJobs", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build()).toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Tool(description = """
+    Provides list of activity instances with the highest transaction order for each process definition.
+    These are the longest-running transactions in the process.
+    Returns information about activity instances including:
+    act_id_ - activity instance ID,
+    act_name_ - activity instance name,
+    transaction_order_ - the transaction order value (highest per process definition),
+    key_ - process definition key associated with the process model,
+    proc_def_id_ - process definition ID.
+    
+    Input parameters used to limit query only to:
+    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
+                    model id.
+    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
+    
+    High transaction order values indicate long-running process paths that may need optimization.
+    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
+    """)
+    public String longRunningTransaction(String definitionKey, Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "longRunningTransaction", ParametersBuilder.create()
+                    .add("definitionKey", definitionKey)
                     .add("latestDeployments", latestDeployments)
                     .build()).toString();
         } catch (Exception e) {

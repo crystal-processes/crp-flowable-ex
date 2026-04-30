@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://www.flowable.org/processdef">
+
+  <process id="longRunningLoop" name="Long Running Loop Process" isExecutable="true">
+    <startEvent id="startEvent" name="Start"/>
+
+    
+    <serviceTask id="incrementIndex" name="Increment Index" 
+                 flowable:expression="${var:getOrDefault('index', 0) + 1}"
+                 flowable:resultVariableName="index"/>
+    
+    <exclusiveGateway id="checkThreshold" name="Check Threshold"/>
+    
+    <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="incrementIndex"/>
+    <sequenceFlow id="flow3" sourceRef="incrementIndex" targetRef="checkThreshold"/>
+    
+    <sequenceFlow id="flowLoopBack" sourceRef="checkThreshold" targetRef="incrementIndex">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${index < threshold}]]></conditionExpression>
+    </sequenceFlow>
+    
+    <receiveTask id="receiveTask" name="Wait Task"/>
+    
+    <sequenceFlow id="flowToReceive" sourceRef="checkThreshold" targetRef="receiveTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${index >= threshold}]]></conditionExpression>
+    </sequenceFlow>
+    
+    <endEvent id="endEvent" name="End"/>
+    <sequenceFlow id="flowToEnd" sourceRef="receiveTask" targetRef="endEvent"/>
+  </process>
+</definitions>

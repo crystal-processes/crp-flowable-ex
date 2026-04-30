@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.crp.flowable.assertions.CrpFlowableAssertions.assertThat;
 
 @CrpMcpTest
 public class DeveloperServiceTest {
@@ -48,6 +48,7 @@ public class DeveloperServiceTest {
         deployment = repositoryService.createDeployment()
                 .addClasspathResource("oneTask.bpmn20.xml")
                 .addClasspathResource("failingServiceTask.bpmn20.xml")
+                .addClasspathResource("longRunningLoop.bpmn20.xml")
                 .deploy();
     }
 
@@ -566,6 +567,77 @@ public class DeveloperServiceTest {
 
         } finally {
             repositoryService.deleteDeployment(newDeployment.getId(), true);
+        }
+    }
+
+    @Test
+    public void longRunningLoop() {
+        long threshold = 10;
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("longRunningLoop")
+                .variable("threshold", threshold)
+                .start();
+
+        assertThat(processInstance)
+                .as("index should reach the threshold")
+                .hasVariableWithValue("index", threshold);
+
+        assertThat(
+                developerService.longRunningTransaction(null, 1)
+        ).contains("ACT_ID_=receiveTask", "KEY_=longRunningLoop", "TRANSACTION_ORDER_=43");
+        assertThat(
+                developerService.longRunningTransaction(null, null)
+        ).contains("ACT_ID_=receiveTask", "KEY_=longRunningLoop", "TRANSACTION_ORDER_=43");
+        assertThat(
+                developerService.longRunningTransaction(null, 2)
+        ).contains("ACT_ID_=receiveTask", "KEY_=longRunningLoop", "TRANSACTION_ORDER_=43");
+        assertThat(
+                developerService.longRunningTransaction("nonExistingKey", null)
+        ).isEqualTo("[]");
+        assertThat(
+                developerService.longRunningTransaction("longRunningLoop", null)
+        ).contains("ACT_ID_=receiveTask", "KEY_=longRunningLoop", "TRANSACTION_ORDER_=43");
+    }
+
+    @Test
+    public void longRunningLoopSelectOnlyMax() {
+        runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("longRunningLoop")
+                .variable("threshold", 10)
+                .start();
+        runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("longRunningLoop")
+                .variable("threshold", 12)
+                .start();
+
+        assertThat(
+                developerService.longRunningTransaction(null, null)
+        ).contains("TRANSACTION_ORDER_=51").doesNotContain("TRANSACTION_ORDER_=43");
+    }
+
+    @Test
+    public void longRunningLoopInDifferentDeployments() {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("longRunningLoop")
+                .variable("threshold", 10)
+                .start();
+
+        Deployment deployment1 = repositoryService.createDeployment()
+                .addClasspathResource("longRunningLoop.bpmn20.xml")
+                .deploy();
+
+        ProcessInstance processInstance2 = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("longRunningLoop")
+                .variable("threshold", 12)
+                .start();
+
+        try {
+            assertThat(
+                    developerService.longRunningTransaction(null, 1)
+            ).contains("ACT_ID_=receiveTask", "KEY_=longRunningLoop", "TRANSACTION_ORDER_=51",
+                    "PROC_DEF_ID_="+processInstance2.getProcessDefinitionId());
+        } finally {
+            repositoryService.deleteDeployment(deployment1.getId(), true);
         }
     }
 

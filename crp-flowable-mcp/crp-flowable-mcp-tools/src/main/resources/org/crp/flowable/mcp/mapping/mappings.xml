@@ -11,6 +11,7 @@
     <mappers>
         <mapper resource="org/crp/flowable/mcp/mapping/VariableMapper.xml" />
         <mapper resource="org/crp/flowable/mcp/mapping/DeadLetterJobMapper.xml" />
+        <mapper resource="org/crp/flowable/mcp/mapping/ActivitiesMapper.xml" />
     </mappers>
 
 </configuration>

@@ -72,5 +72,5 @@
         ) as proc_def_count
         GROUP BY def_id_, key_
     </select>
-    
+
 </mapper>
