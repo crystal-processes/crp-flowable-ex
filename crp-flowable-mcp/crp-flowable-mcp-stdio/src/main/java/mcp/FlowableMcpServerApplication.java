@@ -1,4 +1,4 @@
-package org.crp.flowable.mcp;
+package mcp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Flowable business processes.
  */
 @SpringBootApplication
-public class FlowableMpcServerApplication {
+public class FlowableMcpServerApplication {
 
     /**
      * Main entry point for the Flowable MCP Server application.
@@ -17,6 +17,6 @@ public class FlowableMpcServerApplication {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        SpringApplication.run(FlowableMpcServerApplication.class, args);
+        SpringApplication.run(FlowableMcpServerApplication.class, args);
     }
 }

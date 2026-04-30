@@ -1,7 +1,6 @@
 package org.crp.flowable.mcp;
 
 import org.crp.flowable.mcp.service.DeveloperService;
-import org.crp.flowable.mcp.test.CrpMcpTest;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -583,4 +582,4 @@ public class DeveloperServiceTest {
                 Arguments.of("exact key and types provides limited results", "oneTask", Set.of("string"), Set.of("TYPE_=string", "NAME_=testVariable", "KEY_=oneTask"))
         );
     }
-}
+} 

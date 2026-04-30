@@ -84,7 +84,6 @@ public class DeveloperService {
         }
     }
 
-    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of dead letter jobs. Dead letter jobs are failed jobs that have exhausted all retries.
     Returns information about failed jobs including:
@@ -122,6 +121,7 @@ public class DeveloperService {
         }
     }
 
+    @SuppressWarnings("javadoc")
     @Tool(description = """
     Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
     Returns information about failing jobs including:

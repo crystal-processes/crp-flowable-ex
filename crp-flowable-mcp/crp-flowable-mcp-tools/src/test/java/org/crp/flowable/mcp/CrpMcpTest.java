@@ -1,4 +1,4 @@
-package org.crp.flowable.mcp.test;
+package org.crp.flowable.mcp;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

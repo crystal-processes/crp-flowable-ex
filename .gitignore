@@ -25,7 +25,7 @@ hs_err_pid*
 *.iml
 *.ipr
 *.iws
-/*/target/
+/**/target/
 /.idea/
 
 /crp-flowable-mcp/src/main/resources/application-local.properties
