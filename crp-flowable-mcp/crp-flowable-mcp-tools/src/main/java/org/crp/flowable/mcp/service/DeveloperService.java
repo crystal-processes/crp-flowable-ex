@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
 public class DeveloperService {
 
     private final SqlSessionFactory sqlSessionFactory;

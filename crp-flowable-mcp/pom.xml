@@ -15,7 +15,7 @@
 
     <modules>
         <module>crp-flowable-mcp-tools</module>
-        <module>crp-flowable-mcp-stdio</module>
+        <module>crp-flowable-mcp-server</module>
         <module>crp-flowable-mcp-sse</module>
     </modules>
 

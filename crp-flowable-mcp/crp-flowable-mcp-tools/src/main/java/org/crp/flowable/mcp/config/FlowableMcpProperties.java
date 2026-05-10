@@ -14,7 +14,7 @@ public class FlowableMcpProperties {
     private String mappingConfig = "org/crp/flowable/mcp/mapping/mappings.xml";
     
     /**
-     * Gets whether the Flowable MCP server is enabled.
+     * Gets whether the crp flowable MCP tolls are enabled.
      * 
      * @return true if enabled, false otherwise
      */
@@ -22,11 +22,6 @@ public class FlowableMcpProperties {
         return enabled;
     }
     
-    /**
-     * Sets whether the Flowable MCP server should be enabled.
-     * 
-     * @param enabled true to enable, false to disable
-     */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -40,11 +35,6 @@ public class FlowableMcpProperties {
         return datatablePrefix;
     }
     
-    /**
-     * Sets the database table prefix for Flowable tables.
-     * 
-     * @param datatablePrefix the table prefix to set
-     */
     public void setDatatablePrefix(String datatablePrefix) {
         this.datatablePrefix = datatablePrefix;
     }
@@ -58,11 +48,6 @@ public class FlowableMcpProperties {
         return mappingConfig;
     }
     
-    /**
-     * Sets the path to the MyBatis mapping configuration file.
-     * 
-     * @param mappingConfig the mapping configuration file path to set
-     */
     public void setMappingConfig(String mappingConfig) {
         this.mappingConfig = mappingConfig;
     }

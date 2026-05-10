@@ -22,12 +22,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Properties;
 
-@ConditionalOnProperty(name = "crp.flowable.mcp.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "crp.flowable.mcp.enabled", havingValue = "true")
 @AutoConfiguration
 @EnableConfigurationProperties({
         FlowableMcpProperties.class
 })
-public class FlowableMcpServerConfiguration {
+public class FlowableMcpToolsConfiguration {
 
     @Bean
     public ToolCallbackProvider flowableTools(DeveloperService developerService) {
@@ -53,9 +53,8 @@ public class FlowableMcpServerConfiguration {
             Configuration configuration = parser.parse();
             configuration.setEnvironment(environment);
 
-            //configuration.addMapper(VariableMapper.class);
-                SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
-                return builder.build(configuration);
+            SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
+            return builder.build(configuration);
         }
     }
 }
