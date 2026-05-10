@@ -13,12 +13,9 @@
     <scm>
         <developerConnection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</developerConnection>
         <url>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</url>
-      <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <properties>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -37,12 +34,6 @@
             <dependency>
                 <groupId>io.github.crystal-processes</groupId>
                 <artifactId>crp-flowable-mcp</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.crystal-processes</groupId>
-                <artifactId>crp-flowable-mcp</artifactId>
-                <classifier>lib</classifier>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -73,11 +64,6 @@
             <dependency>
                 <groupId>io.github.crystal-processes</groupId>
                 <artifactId>crp-flowable-ui</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.crystal-processes</groupId>
-                <artifactId>crp-flowable-form</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
