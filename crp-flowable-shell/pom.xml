@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>crp-flowable-shell</artifactId>
-    <version>0.0.10-SNAPSHOT</version>
     <name>crp-flowable-shell</name>
     <description>flowable shell application</description>
 

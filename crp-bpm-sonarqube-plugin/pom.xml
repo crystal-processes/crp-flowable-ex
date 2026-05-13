@@ -10,7 +10,6 @@
 
   <artifactId>crp-bpm-sonarqube-plugin</artifactId>
   <packaging>sonar-plugin</packaging>
-  <version>0.0.10-SNAPSHOT</version>
 
   <name>BPM Sonarqube plugin</name>
   <description>Business process management plugin for Sonarqube</description>
