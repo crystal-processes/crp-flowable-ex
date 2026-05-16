@@ -1,15 +1,10 @@
 package org.crp.sonarsource.plugins.bpm.rules;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
+import org.apache.ibatis.mapping.Environment;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.crp.sonarsource.plugins.bpm.languages.BpmnLanguage;
 import org.crp.sonarsource.plugins.bpm.languages.ReportEvent;
 import org.sonar.api.batch.fs.FileSystem;
@@ -22,23 +17,58 @@ import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * The goal of this Sensor is to load the results of an analysis performed by a BPM coverage.
  * Results are provided as a xml file and are corresponding to the rules defined in 'rules.xml'.
  */
-public class BpmnCoverageLoaderSensor implements Sensor {
+public class BpmnHistoryCoverageSensor implements Sensor {
 
-    private static final Logger LOGGER = Loggers.get(BpmnCoverageLoaderSensor.class);
-
-    public static final String REPORT_PATH_KEY = "crp.flowable.coverage.reportPath";
+    private static final Logger LOGGER = Loggers.get(BpmnHistoryCoverageSensor.class);
 
     protected final Configuration config;
     protected final FileSystem fileSystem;
+    protected final SqlSessionFactory sessionFactory;
     protected SensorContext context;
 
-    public BpmnCoverageLoaderSensor(final Configuration config, final FileSystem fileSystem) {
+    public BpmnHistoryCoverageSensor(final Configuration config, final FileSystem fileSystem) {
         this.config = config;
         this.fileSystem = fileSystem;
+        
+        // Initialize SqlSessionFactory from configuration
+        String jdbcUrl = config.get("sonar.jdbc.url").orElse(null);
+        String jdbcUsername = config.get("sonar.jdbc.username").orElse(null);
+        String jdbcPassword = config.get("sonar.jdbc.password").orElse(null);
+        String jdbcDriver = config.get("sonar.jdbc.driverClass").orElse("org.h2.Driver");
+        
+        if (jdbcUrl != null && jdbcUsername != null && jdbcPassword != null) {
+            try {
+                // Create a simple DataSource wrapper for MyBatis
+                DataSource dataSource = new SonarQubeDataSource(jdbcUrl, jdbcUsername, jdbcPassword, jdbcDriver);
+                
+                // Build MyBatis configuration
+                org.apache.ibatis.session.Configuration mybatisConfig = new org.apache.ibatis.session.Configuration();
+                Environment environment = new Environment("sonar", new JdbcTransactionFactory(), dataSource);
+                mybatisConfig.setEnvironment(environment);
+                
+                // Build SqlSessionFactory
+                sessionFactory = new SqlSessionFactoryBuilder().build(mybatisConfig);
+            } catch (Exception e) {
+                LOGGER.error("Failed to initialize SqlSessionFactory", e);
+                throw new IllegalStateException("Failed to initialize SqlSessionFactory", e);
+            }
+        } else {
+            LOGGER.warn("Database configuration not found in config. SqlSessionFactory will be null.");
+            sessionFactory = null;
+        }
     }
 
     @Override
@@ -130,6 +160,71 @@ public class BpmnCoverageLoaderSensor implements Sensor {
     @Override
     public String toString() {
         return "Bpmn coverage loader sensor";
+    }
+
+    /**
+     * Simple DataSource implementation for SonarQube database configuration.
+     */
+    private static class SonarQubeDataSource implements DataSource {
+        private final String url;
+        private final String username;
+        private final String password;
+        private final String driverClassName;
+
+        SonarQubeDataSource(String url, String username, String password, String driverClassName) {
+            this.url = url;
+            this.username = username;
+            this.password = password;
+            this.driverClassName = driverClassName;
+        }
+
+        @Override
+        public java.sql.Connection getConnection() throws SQLException {
+            try {
+                Class.forName(driverClassName);
+                return java.sql.DriverManager.getConnection(url, username, password);
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("Driver class not found: " + driverClassName, e);
+            }
+        }
+
+        @Override
+        public java.sql.Connection getConnection(String username, String password) throws SQLException {
+            return getConnection();
+        }
+
+        @Override
+        public <T> T unwrap(Class<T> iface) throws SQLException {
+            throw new SQLException("Not supported");
+        }
+
+        @Override
+        public boolean isWrapperFor(Class<?> iface) throws SQLException {
+            return false;
+        }
+
+        @Override
+        public java.io.PrintWriter getLogWriter() throws SQLException {
+            return null;
+        }
+
+        @Override
+        public void setLogWriter(java.io.PrintWriter out) throws SQLException {
+        }
+
+        @Override
+        public void setLoginTimeout(int seconds) throws SQLException {
+        }
+
+        @Override
+        public int getLoginTimeout() throws SQLException {
+            return 0;
+        }
+
+        @Override
+        public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            return null;
+        }
     }
 
 }
