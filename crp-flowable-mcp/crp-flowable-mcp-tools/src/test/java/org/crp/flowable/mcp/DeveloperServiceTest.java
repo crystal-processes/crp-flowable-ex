@@ -8,6 +8,7 @@ import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.test.JobTestHelper;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.job.api.Job;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -280,7 +281,7 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    public void deadLetterJobsTest() {
+    public void deadLetterJobs() {
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
                 .variable("failedJobRetryTimeCycle", "R1/PT1S")
@@ -306,7 +307,7 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    public void deadLetterJobsWithMultipleDeploymentsTest() {
+    public void deadLetterJobsWithMultipleDeployments() {
         ProcessInstance oldProcessInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
                 .variable("failedJobRetryTimeCycle", "R1/PT1S")
@@ -361,7 +362,7 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    public void deadLetterJobsWithStartedAfterTest() {
+    public void deadLetterJobsWithStartedAfter() {
         Instant beforeJobCreation = Instant.now().minusMillis(1L);
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
@@ -413,7 +414,147 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    public void failingRuntimeJobsTest() {
+    public void deadLetterJobDetails() {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                10_000, 500L,
+                () -> managementService.createDeadLetterJobQuery().processInstanceId(processInstance.getId()).count() > 0);
+
+        String result = developerService.deadLetterJobDetails(null, null, null, null);
+
+        assertThat(result)
+                .as("deadLetterJobDetails returns dead letter job information with stacktrace")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId())
+                .contains("JOB_ID_=")
+                .contains("EXCEPTION_MESSAGE_=Unknown property used in expression: ${UnableToResolveExpression} with Execution[ id ")
+                .contains("EXCEPTION_STACKTRACE_=org.flowable.common.engine.api.FlowableException: Unknown property used in expression: ${UnableToResolveExpression} with Execution[ id ");
+    }
+
+    @Test
+    public void deadLetterJobDetailsWithJobId() {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                10_000, 500L,
+                () -> managementService.createDeadLetterJobQuery().processInstanceId(processInstance.getId()).count() > 0);
+
+        Job deadLetterJob = managementService.createDeadLetterJobQuery()
+                .processInstanceId(processInstance.getId())
+                .singleResult();
+
+        String result = developerService.deadLetterJobDetails(deadLetterJob.getId(), null, null, null);
+
+        assertThat(result)
+                .as("deadLetterJobDetails with jobId filters to only that job")
+                .contains("JOB_ID_=" + deadLetterJob.getId())
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId())
+                .contains("EXCEPTION_STACKTRACE_=");
+    }
+
+    @Test
+    public void deadLetterJobDetailsWithDefinitionKey() {
+        ProcessInstance oneTaskInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                10_000, 500L,
+                () -> managementService.createDeadLetterJobQuery().processInstanceId(oneTaskInstance.getId()).count() > 0);
+
+        String resultFailingTask = developerService.deadLetterJobDetails(null, "failingServiceTask", null, null);
+        assertThat(resultFailingTask)
+                .as("definitionKey=failingServiceTask filters to only failingServiceTask dead letter job details")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + oneTaskInstance.getId());
+
+        String resultNonExisting = developerService.deadLetterJobDetails(null, "nonExistingKey", null, null);
+        assertThat(resultNonExisting)
+                .as("non-existing definitionKey returns empty results")
+                .contains("[]");
+    }
+
+    @Test
+    public void deadLetterJobDetailsWithStartedAfter() {
+        Instant beforeJobCreation = Instant.now().minusMillis(1L);
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
+                .start();
+
+        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                10_000, 500L,
+                () -> managementService.createDeadLetterJobQuery().processInstanceId(processInstance.getId()).count() > 0);
+
+        Instant afterJobCreation = Instant.now().plusMillis(1L);
+
+        assertThat(developerService.deadLetterJobDetails(null, null, beforeJobCreation, null))
+                .as("startedAfter before job creation includes the dead letter job")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
+
+        assertThat(developerService.deadLetterJobDetails(null, null, afterJobCreation, null))
+                .as("startedAfter after job creation excludes the dead letter job")
+                .contains("[]");
+
+        assertThat(developerService.deadLetterJobDetails(null, null, null, null))
+                .as("null startedAfter includes all dead letter job details")
+                .contains("KEY_=failingServiceTask")
+                .contains("PROCESS_INSTANCE_ID_=" + processInstance.getId());
+    }
+
+    @Test
+    public void deadLetterJobDetailsWithLatestDeployments() {
+        ProcessInstance oldProcessInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("failingServiceTask")
+                .variable("failedJobRetryTimeCycle", "R1/PT1S")
+                .start();
+
+        Deployment newDeployment = repositoryService.createDeployment()
+                .addClasspathResource("failingServiceTask.bpmn20.xml")
+                .deploy();
+
+        try {
+            ProcessInstance newProcessInstance = runtimeService.createProcessInstanceBuilder()
+                    .processDefinitionKey("failingServiceTask")
+                    .variable("failedJobRetryTimeCycle", "R1/PT1S")
+                    .start();
+
+            JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+                    10_000, 500L,
+                    () -> managementService.createDeadLetterJobQuery().processInstanceId(newProcessInstance.getId()).count() > 0
+                            && managementService.createDeadLetterJobQuery().processInstanceId(oldProcessInstance.getId()).count() > 0);
+
+            String resultLatest1 = developerService.deadLetterJobDetails(null, null, null, 1);
+
+            assertThat(resultLatest1)
+                    .as("deadLetterJobDetails with latestDeployments=1 includes only newest deployment")
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId())
+                    .doesNotContain("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId());
+
+            String resultLatest2 = developerService.deadLetterJobDetails(null, null, null, 2);
+
+            assertThat(resultLatest2)
+                    .as("deadLetterJobDetails with latestDeployments=2 includes both deployments")
+                    .contains("PROCESS_INSTANCE_ID_=" + oldProcessInstance.getId())
+                    .contains("PROCESS_INSTANCE_ID_=" + newProcessInstance.getId());
+
+        } finally {
+            repositoryService.deleteDeployment(newDeployment.getId(), true);
+        }
+    }
+
+    @Test
+    public void failingRuntimeJobs() {
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
                 .variable("failedJobRetryTimeCycle", "R100/PT5M")
@@ -437,7 +578,7 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    public void failingRuntimeJobsWithStartedAfterTest() {
+    public void failingRuntimeJobsWithStartedAfter() {
         Instant beforeJobCreation = Instant.now().minusMillis(1L);
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
@@ -499,7 +640,7 @@ public class DeveloperServiceTest {
     }
 
     @Test
-    public void failingRuntimeJobsWithMultipleDeploymentsTest() {
+    public void failingRuntimeJobsWithMultipleDeployments() {
         ProcessInstance oldProcessInstance = runtimeService.createProcessInstanceBuilder()
                 .processDefinitionKey("failingServiceTask")
                 .variable("failedJobRetryTimeCycle", "R100/PT5M")
@@ -635,7 +776,8 @@ public class DeveloperServiceTest {
             assertThat(
                     developerService.longRunningTransaction(null, 1)
             ).contains("ACT_ID_=receiveTask", "KEY_=longRunningLoop", "TRANSACTION_ORDER_=51",
-                    "PROC_DEF_ID_="+processInstance2.getProcessDefinitionId());
+                    "PROC_DEF_ID_="+processInstance2.getProcessDefinitionId())
+                    .doesNotContain("PROC_DEF_ID_="+processInstance.getProcessDefinitionId());
         } finally {
             repositoryService.deleteDeployment(deployment1.getId(), true);
         }

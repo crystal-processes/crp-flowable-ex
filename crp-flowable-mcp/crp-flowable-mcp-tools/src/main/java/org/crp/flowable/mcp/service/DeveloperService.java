@@ -119,6 +119,62 @@ public class DeveloperService {
         }
     }
 
+    @Tool(description = """
+    Provides detailed information about dead letter jobs including the full exception stacktrace.
+    
+    Returns information about dead letter jobs including:
+    job_id_ - job ID,
+    type_ - job type,
+    handler_type_ - job handler type,
+    handler_cfg_ - job handler configuration,
+    exception_message_ - exception message from the last failure,
+    exception_stacktrace_ - the full exception stacktrace as a string (converted from raw bytes with UTF-8 encoding),
+    create_time_ - when the job was created,
+    element_id_ - BPMN element ID where the job failed,
+    process_instance_id_ - ID of the process instance,
+    proc_def_id_ - process definition ID,
+    key_ - process definition key associated with the process model.
+    
+    Jobs are ordered by create_time_ DESC (newest first).
+    
+    Input parameters used to limit query only to:
+    jobId - String representing the specific dead letter job ID to retrieve (optional). When provided, returns only that job.
+    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
+                    model id.
+    startedAfter - Instant representing the minimum job creation time (inclusive)
+    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
+    
+    This tool is essential for debugging dead letter jobs. The exception_stacktrace_ field provides the complete
+    error details as a readable string needed to identify and fix the root cause of job failures.
+    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
+    """)
+    public String deadLetterJobDetails(String jobId, String definitionKey, Instant startedAfter, Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            List<Object> results = getSelectList(sqlSession, "findDeadLetterJobDetails", ParametersBuilder.create()
+                    .add("jobId", jobId)
+                    .add("definitionKey", definitionKey)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build());
+            
+            // Convert exception_stacktrace_ from raw byte[] to UTF-8 String
+            for (Object result : results) {
+                if (result instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> map = (Map<String, Object>) result;
+                    Object bytes = map.get("EXCEPTION_STACKTRACE_");
+                    if (bytes instanceof byte[]) {
+                        map.put("EXCEPTION_STACKTRACE_", new String((byte[]) bytes, java.nio.charset.StandardCharsets.UTF_8));
+                    }
+                }
+            }
+            
+            return results.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Tool(description = """
     Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
