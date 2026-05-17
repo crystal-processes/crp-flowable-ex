@@ -2,7 +2,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.crp.flowable.mcp.mapper.DeadLetterJobMapper">
     
-    <select id="findDeadLetterJobs" resultType="map">
+    <resultMap id="deadLetterJobResultMap" type="org.crp.flowable.mcp.service.DeveloperService$DeadLetterJob">
+        <constructor>
+            <arg column="id_" javaType="String"/>
+            <arg column="type_" javaType="String"/>
+            <arg column="handler_type_" javaType="String"/>
+            <arg column="handler_cfg_" javaType="String"/>
+            <arg column="exception_message_" javaType="String"/>
+            <arg column="create_time_" javaType="java.time.Instant"/>
+            <arg column="element_id_" javaType="String"/>
+            <arg column="process_instance_id_" javaType="String"/>
+            <arg column="proc_def_id_" javaType="String"/>
+            <arg column="key_" javaType="String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="failingRuntimeJobResultMap" type="org.crp.flowable.mcp.service.DeveloperService$FailingRuntimeJob">
+        <constructor>
+            <arg column="id_" javaType="String"/>
+            <arg column="type_" javaType="String"/>
+            <arg column="handler_type_" javaType="String"/>
+            <arg column="handler_cfg_" javaType="String"/>
+            <arg column="retries_" javaType="Integer"/>
+            <arg column="exception_message_" javaType="String"/>
+            <arg column="create_time_" javaType="java.time.Instant"/>
+            <arg column="element_id_" javaType="String"/>
+            <arg column="process_instance_id_" javaType="String"/>
+            <arg column="proc_def_id_" javaType="String"/>
+            <arg column="key_" javaType="String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="deadLetterJobDetailResultMap" type="org.crp.flowable.mcp.service.DeveloperService$DeadLetterJobDetail">
+        <constructor>
+            <arg column="job_id_" javaType="String"/>
+            <arg column="type_" javaType="String"/>
+            <arg column="handler_type_" javaType="String"/>
+            <arg column="handler_cfg_" javaType="String"/>
+            <arg column="exception_message_" javaType="String"/>
+            <arg column="exception_stacktrace_" javaType="String" typeHandler="org.crp.flowable.mcp.service.ByteArrayToStringTypeHandler"/>
+            <arg column="create_time_" javaType="java.time.Instant"/>
+            <arg column="element_id_" javaType="String"/>
+            <arg column="process_instance_id_" javaType="String"/>
+            <arg column="proc_def_id_" javaType="String"/>
+            <arg column="key_" javaType="String"/>
+        </constructor>
+    </resultMap>
+    
+    <select id="findDeadLetterJobs" resultMap="deadLetterJobResultMap">
         SELECT 
             job.id_ as id_,
             job.type_ as type_,
@@ -37,7 +84,7 @@
         ORDER BY job.create_time_ DESC
     </select>
     
-    <select id="findFailingRuntimeJobs" resultType="map">
+    <select id="findFailingRuntimeJobs" resultMap="failingRuntimeJobResultMap">
         SELECT 
             job.id_ as id_,
             job.type_ as type_,
@@ -74,7 +121,7 @@
         ORDER BY job.create_time_ DESC
     </select>
 
-    <select id="findDeadLetterJobDetails" resultType="map">
+    <select id="findDeadLetterJobDetails" resultMap="deadLetterJobDetailResultMap">
         SELECT 
             job.id_ as job_id_,
             job.type_ as type_,

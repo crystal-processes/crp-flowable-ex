@@ -21,147 +21,169 @@ public class DeveloperService {
         this.sqlSessionFactory = sqlSessionFactory;
     }
 
+    /**
+     * Maximum variable count per process definition.
+     * @param defId deployed definition id
+     * @param key process definition key matches with the process model id in the bpmn file
+     * @param varCount maximum count of variables per the process instance
+     */
+    public record MaxVariableCount(String defId, String key, Long varCount) {}
+
+    /**
+     * Variable information.
+     * @param id process instance
+     * @param key process definition key matches with the process model id in the bpmn file
+     * @param name variable name
+     * @param type variable type
+     */
+    public record VariableInfo(String id, String key, String name, String type) {}
+
+    /**
+     * Dead letter job information.
+     * @param id job ID
+     * @param type job type
+     * @param handlerType job handler type
+     * @param handlerConfig job handler configuration
+     * @param exceptionMessage exception message from the last failure
+     * @param createTime when the job was created
+     * @param elementId BPMN element ID where the job failed
+     * @param processInstanceId ID of the process instance
+     * @param procDefId process definition ID
+     * @param key_ process definition key associated with the process model
+     */
+    public record DeadLetterJob(String id, String type, String handlerType, String handlerConfig,
+                                String exceptionMessage, Instant createTime, String elementId,
+                                String processInstanceId, String procDefId, String key_) {}
+
+    /**
+     * Detailed dead letter job information including full exception stacktrace.
+     * @param jobId job ID
+     * @param type job type
+     * @param handlerType job handler type
+     * @param handlerConfig job handler configuration
+     * @param exceptionMessage exception message from the last failure
+     * @param exceptionStacktrace the full exception stacktrace as a string
+     * @param createTime when the job was created
+     * @param elementId BPMN element ID where the job failed
+     * @param processInstanceId ID of the process instance
+     * @param procDefId process definition ID
+     * @param key_ process definition key associated with the process model
+     */
+    public record DeadLetterJobDetail(String jobId, String type, String handlerType, String handlerConfig,
+                                      String exceptionMessage, String exceptionStacktrace, Instant createTime,
+                                      String elementId, String processInstanceId, String procDefId, String key_) {}
+
+    /**
+     * Failing runtime job information.
+     * @param id job ID
+     * @param type job type
+     * @param handlerType job handler type
+     * @param handlerConfig job handler configuration
+     * @param retries number of retries remaining
+     * @param exceptionMessage exception message from the last failure
+     * @param createTime when the job was created
+     * @param elementId BPMN element ID where the job failed
+     * @param processInstanceId ID of the process instance
+     * @param procDefId process definition ID
+     * @param key_ process definition key associated with the process model
+     */
+    public record FailingRuntimeJob(String id, String type, String handlerType, String handlerConfig,
+                                    Integer retries, String exceptionMessage, Instant createTime,
+                                    String elementId, String processInstanceId, String procDefId, String key_) {}
+
+    /**
+     * Long-running transaction information.
+     * @param actId activity instance ID
+     * @param actName activity instance name
+     * @param transactionOrder the transaction order value (highest per process definition)
+     * @param key process definition key associated with the process model
+     * @param procDefId process definition ID
+     */
+    public record LongRunningTransaction(String actId, String actName, Long transactionOrder,
+                                          String key, String procDefId) {}
+
     @Tool(description = """
-    Provides maximum variable count per process instance. 
-    
-    Returns
-    def_id_ - deployed definition id,
-    key_ - process definition key matches with the process model id in the bpmn file,
-    var_count_ - maximum count of variables per the process instance. Too many variables can indicate design issue.
-    
-    The problem could be that process definition is already outdated and currently deployed definition is fixed already.
-    """)
-    public String maxVariablesPerProcessDefinition(
-            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
-            @ToolParam(description = "Minimum start time for process instances (inclusive)", required = false) Instant startedAfter,
-            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 latest)", required = false) Integer latestDeployments) {
+            Provides maximum variable count per process instance.
+            Too many variables can indicate design issue.
+            """)
+    public List<MaxVariableCount> maxVariablesPerProcessDefinition(
+            @ToolParam(description = "Process definition key to filter by", required = false) String definitionKey,
+            @ToolParam(description = "Minimum start time for process instances", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findMaxVariablesPerProcessDefinition", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
-                    .build()).toString();
+                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-    private static List<Object> getSelectList(SqlSession sqlSession, String statement, Object params) {
+    
+    private <T> List<T> getSelectList(SqlSession sqlSession, String statement, Object params) {
         return sqlSession.selectList(statement, params, new RowBounds(0, 50));
     }
 
     @Tool(description = """
-    Provides list of variables per process definition limited by types. Usual complex variable types are:
-    bytes, serializable, longString, jpa-entity-list.
-    
-    The method returns array of:
-    id_ - process instance,
-    key_ - process definition key matches with the process model id in the bpmn file,
-    name_ - variable name,
-    type_ - variable type.
-    
-    The problem could be that process definition is already outdated and currently deployed definition is fixed already.
-    """)
-    public String variableTypes(
-            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            Provides list of variables per process definition limited by types.
+            The problem could be that process definition is already outdated and currently deployed definition is fixed already.
+            """)
+    public List<VariableInfo> variableTypes(
+            @ToolParam(description = "Process definition key to filter by", required = false) String definitionKey,
             @ToolParam(description = "Variable types to filter by", required = false) Collection<String> types,
-            @ToolParam(description = "Minimum start time for process instances (inclusive)", required = false) Instant startedAfter,
-            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
+            @ToolParam(description = "Minimum start time for process instances", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findVariableByTypes", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
                     .add("types", types)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
-                    .build())
-                    .toString();
+                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+
+
     @Tool(description = """
-    Provides list of dead letter jobs. Dead letter jobs are failed jobs that have exhausted all retries.
-    Returns information about failed jobs including:
-    id_ - job ID,
-    type_ - job type,
-    handler_type_ - job handler type,
-    handler_config_ - job handler configuration,
-    exception_message_ - exception message from the last failure,
-    create_time_ - when the job was created,
-    element_id_ - BPMN element ID where the job failed,
-    process_instance_id_ - ID of the process instance,
-    proc_def_id_ - process definition ID,
-    key_ - process definition key associated with the process model.
-    
-    Jobs are ordered by create_time_ DESC (newest first).
-    
-    DeadLetter job indicates a serious problem in the execution, which needs immediate attention.
-    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
-    """)
-    public String deadLetterJobs(
-            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
-            @ToolParam(description = "Minimum job creation time (inclusive)", required = false) Instant startedAfter,
-            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
+            Provides list of dead letter jobs.
+            Jobs are ordered by createTime DESC.
+            DeadLetter job indicates a serious problem in the execution.
+            """)
+    public List<DeadLetterJob> deadLetterJobs(
+            @ToolParam(description = "Process definition key to filter by", required = false) String definitionKey,
+            @ToolParam(description = "Minimum job creation time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findDeadLetterJobs", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
-                    .build()).toString();
+                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Tool(description = """
-    Provides detailed information about dead letter jobs including the full exception stacktrace.
-    
-    Returns information about dead letter jobs including:
-    job_id_ - job ID,
-    type_ - job type,
-    handler_type_ - job handler type,
-    handler_cfg_ - job handler configuration,
-    exception_message_ - exception message from the last failure,
-    EXCEPTION_STACKTRACE_ - the full exception stacktrace as a string (converted from raw bytes with UTF-8 encoding),
-    create_time_ - when the job was created,
-    element_id_ - BPMN element ID where the job failed,
-    process_instance_id_ - ID of the process instance,
-    proc_def_id_ - process definition ID,
-    key_ - process definition key associated with the process model.
-    
-    Jobs are ordered by create_time_ DESC (newest first).
-    
-    This tool is essential for debugging dead letter jobs. The EXCEPTION_STACKTRACE_ field provides the complete
-    error details as a readable string needed to identify and fix the root cause of job failures.
-    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
-    """)
-    public String deadLetterJobDetails(
+            Provides detailed information about dead letter jobs including the full exception stacktrace.
+            Jobs are ordered by createTime DESC.
+            """)
+    public List<DeadLetterJobDetail> deadLetterJobDetails(
             @ToolParam(description = "Specific dead letter job ID to retrieve", required = false) String jobId,
-            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
-            @ToolParam(description = "Minimum job creation time (inclusive)", required = false) Instant startedAfter,
-            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
+            @ToolParam(description = "Process definition key to filter by", required = false) String definitionKey,
+            @ToolParam(description = "Minimum job creation time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            List<Object> results = getSelectList(sqlSession, "findDeadLetterJobDetails", ParametersBuilder.create()
+            return getSelectList(sqlSession, "findDeadLetterJobDetails", ParametersBuilder.create()
                     .add("jobId", jobId)
                     .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
                     .build());
-            
-            // Convert EXCEPTION_STACKTRACE_ from raw byte[] to UTF-8 String
-            for (Object result : results) {
-                if (result instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> map = (Map<String, Object>) result;
-                    Object bytes = map.get("EXCEPTION_STACKTRACE_");
-                    if (bytes instanceof byte[]) {
-                        map.put("EXCEPTION_STACKTRACE_", new String((byte[]) bytes, java.nio.charset.StandardCharsets.UTF_8));
-                    }
-                }
-            }
-            
-            return results.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -169,63 +191,37 @@ public class DeveloperService {
 
 
     @Tool(description = """
-    Provides list of failing runtime jobs. These are jobs that have failed but still have retries remaining.
-    Returns information about failing jobs including:
-    id_ - job ID,
-    type_ - job type,
-    handler_type_ - job handler type,
-    handler_config_ - job handler configuration,
-    retries_ - number of retries remaining,
-    exception_message_ - exception message from the last failure,
-    create_time_ - when the job was created,
-    element_id_ - BPMN element ID where the job failed,
-    process_instance_id_ - ID of the process instance,
-    proc_def_id_ - process definition ID,
-    key_ - process definition key associated with the process model.
-    
-    Jobs are ordered by create_time_ DESC (newest first).
-    Only jobs with exception_msg_ (failed jobs) are returned.
-    
-    Failing runtime jobs indicate ongoing execution problems that may resolve automatically through retries.
-    However, persistent failures suggest underlying issues that need investigation.
-    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
-    """)
-    public String failingRuntimeJobs(
-            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
-            @ToolParam(description = "Minimum job creation time (inclusive)", required = false) Instant startedAfter,
-            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
+            Provides list of failing runtime jobs.
+            Jobs are ordered by createTime DESC.
+            Only jobs with exception_msg_ are returned.
+            """)
+    public List<FailingRuntimeJob> failingRuntimeJobs(
+            @ToolParam(description = "Process definition key to filter by", required = false) String definitionKey,
+            @ToolParam(description = "Minimum job creation time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findFailingRuntimeJobs", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
                     .add("startedAfter", startedAfter)
                     .add("latestDeployments", latestDeployments)
-                    .build()).toString();
+                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Tool(description = """
-    Provides list of activity instances with the highest transaction order for each process definition.
-    These are the longest-running transactions in the process.
-    Returns information about activity instances including:
-    act_id_ - activity instance ID,
-    act_name_ - activity instance name,
-    transaction_order_ - the transaction order value (highest per process definition),
-    key_ - process definition key associated with the process model,
-    proc_def_id_ - process definition ID.
-    
-    High transaction order values indicate long-running process paths that may need optimization.
-    The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
-    """)
-    public String longRunningTransaction(
-            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
-            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
+            Provides list of activity instances with the highest transaction order for each process definition.
+            High transaction order values indicate long-running process paths.
+            """)
+    public List<LongRunningTransaction> longRunningTransaction(
+            @ToolParam(description = "Process definition key to filter by", required = false) String definitionKey,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "longRunningTransaction", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
                     .add("latestDeployments", latestDeployments)
-                    .build()).toString();
+                    .build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
