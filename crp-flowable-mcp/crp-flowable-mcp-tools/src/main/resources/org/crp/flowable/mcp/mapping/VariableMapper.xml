@@ -2,7 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.crp.flowable.mcp.mapper.VariableMapper">
     
-    <select id="findVariableByTypes" resultType="map">
+    <resultMap id="variableInfoResultMap" type="org.crp.flowable.mcp.service.DeveloperService$VariableInfo">
+        <constructor>
+            <arg column="id_" javaType="String"/>
+            <arg column="key_" javaType="String"/>
+            <arg column="name_" javaType="String"/>
+            <arg column="type_" javaType="String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="maxVariableCountResultMap" type="org.crp.flowable.mcp.service.DeveloperService$MaxVariableCount">
+        <constructor>
+            <arg column="def_id_" javaType="String"/>
+            <arg column="key_" javaType="String"/>
+            <arg column="max_var_count" javaType="Long"/>
+        </constructor>
+    </resultMap>
+    
+    <select id="findVariableByTypes" resultMap="variableInfoResultMap">
         SELECT 
             prc.id_ as id_, 
             prc.proc_def_id_ as def_id_,
@@ -36,7 +53,7 @@
         GROUP BY prc.id_, prc.proc_def_id_, def.key_, var.name_, var.var_type_
     </select>
     
-    <select id="findMaxVariablesPerProcessDefinition" resultType="map">
+    <select id="findMaxVariablesPerProcessDefinition" resultMap="maxVariableCountResultMap">
         SELECT 
             proc_def_count.def_id_, 
             proc_def_count.key_, 

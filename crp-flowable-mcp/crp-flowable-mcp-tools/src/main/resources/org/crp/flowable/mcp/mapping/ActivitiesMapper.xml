@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.crp.flowable.mcp.mapper.ActivitiesMapper">
+    
+    <resultMap id="longRunningTransactionResultMap" type="org.crp.flowable.mcp.service.DeveloperService$LongRunningTransaction">
+        <constructor>
+            <arg column="act_id_" javaType="String"/>
+            <arg column="act_name_" javaType="String"/>
+            <arg column="transaction_order_" javaType="Long"/>
+            <arg column="key_" javaType="String"/>
+            <arg column="proc_def_id_" javaType="String"/>
+        </constructor>
+    </resultMap>
 
-    <select id="longRunningTransaction" resultType="map">
+    <select id="longRunningTransaction" resultMap="longRunningTransactionResultMap">
         SELECT
         act.act_id_ as act_id_,
         act.act_name_ as act_name_,
