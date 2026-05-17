@@ -4,6 +4,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
@@ -21,20 +22,19 @@ public class DeveloperService {
     }
 
     @Tool(description = """
-    Provides maximum variable count per process instance. Returns
+    Provides maximum variable count per process instance. 
+    
+    Returns
     def_id_ - deployed definition id,
     key_ - process definition key matches with the process model id in the bpmn file,
     var_count_ - maximum count of variables per the process instance. Too many variables can indicate design issue.
     
-    Input parameters used to limit query only to:
-    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
-                    model id.
-    startedAfter - Instant representing the minimum start time for process instances (inclusive)
-    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments, 1 latest)
-    
     The problem could be that process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String maxVariablesPerProcessDefinition(String definitionKey, Instant startedAfter, Integer latestDeployments) {
+    public String maxVariablesPerProcessDefinition(
+            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            @ToolParam(description = "Minimum start time for process instances (inclusive)", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 latest)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findMaxVariablesPerProcessDefinition", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
@@ -53,12 +53,6 @@ public class DeveloperService {
     @Tool(description = """
     Provides list of variables per process definition limited by types. Usual complex variable types are:
     bytes, serializable, longString, jpa-entity-list.
-    Input parameters used to limit query only to:
-    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
-                    model id.
-    types - collection of types
-    startedAfter - Instant representing the minimum start time for process instances (inclusive)
-    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
     
     The method returns array of:
     id_ - process instance,
@@ -68,7 +62,11 @@ public class DeveloperService {
     
     The problem could be that process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String variableTypes(String definitionKey, Collection<String> types, Instant startedAfter, Integer latestDeployments) {
+    public String variableTypes(
+            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            @ToolParam(description = "Variable types to filter by", required = false) Collection<String> types,
+            @ToolParam(description = "Minimum start time for process instances (inclusive)", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findVariableByTypes", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
@@ -98,16 +96,13 @@ public class DeveloperService {
     
     Jobs are ordered by create_time_ DESC (newest first).
     
-    Input parameters used to limit query only to:
-    definitionKey - String representing the process definition key to filter by (optional)  definitionKey maps to process
-                    model id.
-    startedAfter - Instant representing the minimum job creation time (inclusive)
-    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
-    
     DeadLetter job indicates a serious problem in the execution, which needs immediate attention.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String deadLetterJobs(String definitionKey, Instant startedAfter, Integer latestDeployments) {
+    public String deadLetterJobs(
+            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            @ToolParam(description = "Minimum job creation time (inclusive)", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findDeadLetterJobs", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
@@ -128,7 +123,7 @@ public class DeveloperService {
     handler_type_ - job handler type,
     handler_cfg_ - job handler configuration,
     exception_message_ - exception message from the last failure,
-    exception_stacktrace_ - the full exception stacktrace as a string (converted from raw bytes with UTF-8 encoding),
+    EXCEPTION_STACKTRACE_ - the full exception stacktrace as a string (converted from raw bytes with UTF-8 encoding),
     create_time_ - when the job was created,
     element_id_ - BPMN element ID where the job failed,
     process_instance_id_ - ID of the process instance,
@@ -137,18 +132,15 @@ public class DeveloperService {
     
     Jobs are ordered by create_time_ DESC (newest first).
     
-    Input parameters used to limit query only to:
-    jobId - String representing the specific dead letter job ID to retrieve (optional). When provided, returns only that job.
-    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
-                    model id.
-    startedAfter - Instant representing the minimum job creation time (inclusive)
-    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
-    
-    This tool is essential for debugging dead letter jobs. The exception_stacktrace_ field provides the complete
+    This tool is essential for debugging dead letter jobs. The EXCEPTION_STACKTRACE_ field provides the complete
     error details as a readable string needed to identify and fix the root cause of job failures.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String deadLetterJobDetails(String jobId, String definitionKey, Instant startedAfter, Integer latestDeployments) {
+    public String deadLetterJobDetails(
+            @ToolParam(description = "Specific dead letter job ID to retrieve", required = false) String jobId,
+            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            @ToolParam(description = "Minimum job creation time (inclusive)", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             List<Object> results = getSelectList(sqlSession, "findDeadLetterJobDetails", ParametersBuilder.create()
                     .add("jobId", jobId)
@@ -157,7 +149,7 @@ public class DeveloperService {
                     .add("latestDeployments", latestDeployments)
                     .build());
             
-            // Convert exception_stacktrace_ from raw byte[] to UTF-8 String
+            // Convert EXCEPTION_STACKTRACE_ from raw byte[] to UTF-8 String
             for (Object result : results) {
                 if (result instanceof Map) {
                     @SuppressWarnings("unchecked")
@@ -194,17 +186,14 @@ public class DeveloperService {
     Jobs are ordered by create_time_ DESC (newest first).
     Only jobs with exception_msg_ (failed jobs) are returned.
     
-    Input parameters used to limit query only to:
-    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
-                    model id.
-    startedAfter - Instant representing the minimum job creation time (inclusive)
-    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
-    
     Failing runtime jobs indicate ongoing execution problems that may resolve automatically through retries.
     However, persistent failures suggest underlying issues that need investigation.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String failingRuntimeJobs(String definitionKey, Instant startedAfter, Integer latestDeployments) {
+    public String failingRuntimeJobs(
+            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            @ToolParam(description = "Minimum job creation time (inclusive)", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "findFailingRuntimeJobs", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
@@ -226,15 +215,12 @@ public class DeveloperService {
     key_ - process definition key associated with the process model,
     proc_def_id_ - process definition ID.
     
-    Input parameters used to limit query only to:
-    definitionKey - String representing the process definition key to filter by (optional). definitionKey maps to process
-                    model id.
-    latestDeployments - Integer limiting results to only the most recent deployments (null or <=0 means all deployments)
-    
     High transaction order values indicate long-running process paths that may need optimization.
     The problem could be that the process definition is already outdated and currently deployed definition is fixed already.
     """)
-    public String longRunningTransaction(String definitionKey, Integer latestDeployments) {
+    public String longRunningTransaction(
+            @ToolParam(description = "Process definition key to filter by. DefinitionKey maps to process model id.", required = false) String definitionKey,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all)", required = false) Integer latestDeployments) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
             return getSelectList(sqlSession, "longRunningTransaction", ParametersBuilder.create()
                     .add("definitionKey", definitionKey)
