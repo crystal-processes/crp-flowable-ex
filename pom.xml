@@ -40,16 +40,16 @@
     <java.version>17</java.version>
     <java.release>17</java.release>
 
-    <flowable.version>7.2.0</flowable.version>
-    <spring.boot.version>3.5.11</spring.boot.version>
-    <spring.framework.version>6.2.10</spring.framework.version>
+    <flowable.version>8.0.0</flowable.version>
+    <spring.boot.version>4.1.0-RC1</spring.boot.version>
+    <spring.framework.version>7.0.7</spring.framework.version>
     <spring.ai.version>1.1.6</spring.ai.version>
-    <groovy.version>4.0.26</groovy.version>
-    <junit.jupiter.version>5.12.1</junit.jupiter.version>
-    <hikari.version>3.4.2</hikari.version>
-    <slf4j.version>2.0.7</slf4j.version>
-    <assertj.version>3.24.2</assertj.version>
-    <mockito.version>5.19.0</mockito.version>
+    <groovy.version>4.0.28</groovy.version>
+    <junit.jupiter.version>6.0.3</junit.jupiter.version>
+    <hikari.version>7.0.2</hikari.version>
+    <slf4j.version>2.0.17</slf4j.version>
+    <assertj.version>3.27.7</assertj.version>
+    <mockito.version>5.23.0</mockito.version>
   </properties>
 
   <dependencies>

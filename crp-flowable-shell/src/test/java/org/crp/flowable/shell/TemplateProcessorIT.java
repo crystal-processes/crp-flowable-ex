@@ -1,7 +1,6 @@
 package org.crp.flowable.shell;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -9,14 +8,11 @@ import org.crp.flowable.shell.commands.Deployment;
 import org.crp.flowable.shell.commands.RawRest;
 import org.crp.flowable.shell.commands.TemplateProcessor;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
-import org.springframework.shell.test.ShellAssertions;
+import org.springframework.boot.freemarker.autoconfigure.FreeMarkerAutoConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ContextConfiguration(classes = {Deployment.class, RawRest.class, TemplateProcessor.class, FreeMarkerAutoConfiguration.class})
 public class TemplateProcessorIT extends AbstractCommandTest {
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     void generateJUnitTest() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
