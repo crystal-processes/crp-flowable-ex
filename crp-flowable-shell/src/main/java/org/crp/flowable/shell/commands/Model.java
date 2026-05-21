@@ -14,10 +14,10 @@ import org.crp.flowable.shell.utils.ExecuteWithModelId;
 import org.crp.flowable.shell.utils.RestCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.CommandGroup;
+import org.springframework.stereotype.Component;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +28,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@ShellCommandGroup
-@ShellComponent
+@CommandGroup(name = "Model")
+@Component
 public class Model extends RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(Model.class);
 
@@ -48,38 +48,38 @@ public class Model extends RestCommand {
         this.properties = properties;
     }
 
-    @ShellMethod("Export model from modeler to file.")
-    public void export(@ShellOption(defaultValue = "app") String type,
-                       @ShellOption String name,
-                       @ShellOption(value="tenant-id", defaultValue = "") String tenantId,
-                       @ShellOption(value="output-file-name") String outputFileName) {
+    @Command(description = "Export model from modeler to file.")
+    public void export(@Option(defaultValue = "app") String type,
+                       @Option String name,
+                       @Option(longName = "tenant-id", defaultValue = "") String tenantId,
+                       @Option(longName = "output-file-name") String outputFileName) {
         executeWithModelId(type, name, (client, modelId) -> saveModelToFile(client, modelId, outputFileName));
     }
 
-    @ShellMethod("Export deployable model from modeler to file.")
-    public void exportBar(@ShellOption(defaultValue = "app") String type,
-                       @ShellOption String name,
-                       @ShellOption(value="tenant-id", defaultValue = "") String tenantId,
-                       @ShellOption(value="output-file-name") String outputFileName) {
+    @Command(description = "Export deployable model from modeler to file.")
+    public void exportBar(@Option(defaultValue = "app") String type,
+                       @Option String name,
+                       @Option(longName = "tenant-id", defaultValue = "") String tenantId,
+                       @Option(longName = "output-file-name") String outputFileName) {
         executeWithModelId(type, name, (client, modelId) -> saveModelToBarFile(client, modelId, outputFileName));
     }
 
-    @ShellMethod(value = "Delete model from modeler.", key = {"rm", "delete-model"})
+    @Command(name = {"rm", "delete-model"}, description = "Delete model from modeler.")
     public JsonNode deleteModel(String name,
-                            @ShellOption(defaultValue = "app") String type,
-                            @ShellOption(value="tenant-id", defaultValue = "") String tenantId) {
+                            @Option(defaultValue = "app") String type,
+                            @Option(longName = "tenant-id", defaultValue = "") String tenantId) {
         return executeWithModelId(type, name, this::deleteModel);
     }
 
 
-    @ShellMethod(value="Import file to modeler.", key="import")
-    public JsonNode importToModeler(@ShellOption(value="input-file-name", optOut = true) String inputFileName,
-                                @ShellOption(value="tenant-id", defaultValue = "") String tenantId) {
+    @Command(name = {"import"}, description = "Import file to modeler.")
+    public JsonNode importToModeler(@Option(longName = "input-file-name", required = false) String inputFileName,
+                                @Option(longName = "tenant-id", defaultValue = "") String tenantId) {
         return executeWithClient(client -> importApp(client, inputFileName, Paths.get(inputFileName).getFileName().toString(), tenantId));
     }
 
-    @ShellMethod(value = "List models.", key={"ls", "list"})
-    public JsonNode list(@ShellOption(defaultValue = "") String name, @ShellOption(defaultValue = "app") String type) {
+    @Command(name = {"ls", "list"}, description = "List models.")
+    public JsonNode list(@Option(defaultValue = "") String name, @Option(defaultValue = "app") String type) {
         return executeWithClient(client -> getModels(client, type, name));
     }
 

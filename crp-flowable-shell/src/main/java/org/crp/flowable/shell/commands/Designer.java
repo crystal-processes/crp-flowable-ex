@@ -15,10 +15,10 @@ import org.crp.flowable.shell.model.ShellCommandException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.CommandGroup;
+import org.springframework.stereotype.Component;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -28,8 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-@ShellCommandGroup
-@ShellComponent
+@CommandGroup(name = "Designer")
+@Component
 public class Designer {
     private static final Logger LOGGER = LoggerFactory.getLogger(Designer.class);
     private static final String FLOWABLE_JSON_PROP_MESSAGE = "message";
@@ -44,10 +44,10 @@ public class Designer {
         this.properties = properties;
     }
 
-    @ShellMethod(value = "Export application model from modeler to file.", key = {"dx", "designer-export"})
-    public JsonNode export(@ShellOption String name,
-                       @ShellOption(value="workspace", defaultValue = "default") String workspace,
-                       @ShellOption(value="output-file-name") String outputFileName) {
+    @Command(name = {"dx", "designer-export"}, description = "Export application model from modeler to file.")
+    public JsonNode export(@Option String name,
+                       @Option(longName = "workspace", defaultValue = "default") String workspace,
+                       @Option(longName = "output-file-name") String outputFileName) {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
             URI uri = new URIBuilder(createExportModelUrl(workspace, name)).build();
             HttpGet httpGet = new HttpGet(uri);

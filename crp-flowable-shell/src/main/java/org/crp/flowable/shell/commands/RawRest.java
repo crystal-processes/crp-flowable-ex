@@ -15,15 +15,14 @@ import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.crp.flowable.shell.utils.RestCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.shell.standard.EnumValueProvider;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.stereotype.Component;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-@ShellComponent
+@Component
 public class RawRest extends RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(RawRest.class);
 
@@ -33,9 +32,9 @@ public class RawRest extends RestCommand {
         this.properties = properties;
     }
 
-    @ShellMethod(value = "execute url with logged in client.", key = {"exl", "execute-logged"})
-    public JsonNode executeLoggedIn(@ShellOption(defaultValue = "GET", valueProvider = EnumValueProvider.class) RequestMethod method, String url,
-            @ShellOption(defaultValue = "") String body) {
+    @Command(name = {"exl", "execute-logged"}, description = "execute url with logged in client.")
+    public JsonNode executeLoggedIn(@Option(defaultValue = "GET") RequestMethod method, String url,
+            @Option(defaultValue = "") String body) {
 
         return executeWithLoggedInClient(client -> {
             try {
@@ -52,9 +51,9 @@ public class RawRest extends RestCommand {
         });
     }
 
-    @ShellMethod(value = "execute url.", key = {"ex", "execute"})
-    public JsonNode execute(@ShellOption(defaultValue = "GET", valueProvider = EnumValueProvider.class) RequestMethod method, String url,
-            @ShellOption(defaultValue = "") String body) {
+    @Command(name = {"ex", "execute"}, description = "execute url.")
+    public JsonNode execute(@Option(defaultValue = "GET") RequestMethod method, String url,
+            @Option(defaultValue = "") String body) {
         return executeWithClient(client -> {
             try {
                 HttpUriRequest httpUriRequest = createHttpUriRequest(url, method, body);

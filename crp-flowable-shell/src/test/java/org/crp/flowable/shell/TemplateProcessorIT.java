@@ -1,29 +1,28 @@
 package org.crp.flowable.shell;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.crp.flowable.shell.commands.Deployment;
-import org.crp.flowable.shell.commands.RawRest;
-import org.crp.flowable.shell.commands.TemplateProcessor;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.freemarker.autoconfigure.FreeMarkerAutoConfiguration;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.shell.test.ShellScreen;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ContextConfiguration(classes = {Deployment.class, RawRest.class, TemplateProcessor.class, FreeMarkerAutoConfiguration.class})
 public class TemplateProcessorIT extends AbstractCommandTest {
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void generateJUnitTest() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void generateJUnitTest() throws Exception {
         FileUtils.delete(new File("target/OneTaskProcessTest.java"));
         JsonNode deployment = createDeployment();
 
@@ -45,8 +44,10 @@ public class TemplateProcessorIT extends AbstractCommandTest {
 
     }
 
-    private JsonNode createDeployment() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        JsonNode deployment = (JsonNode) evaluableShell.evaluate(() -> "deploy src/test/resources/app.bar --deployment-name testFileName.bar");
+    private JsonNode createDeployment() throws Exception {
+        ShellScreen screen = client.sendCommand("deploy src/test/resources/app.bar --deployment-name testFileName.bar");
+        String output = screen.toString();
+        JsonNode deployment = objectMapper.readTree(output);
         assertThat(deployment.toString()).
                 contains("\"name\":\"testFileName\"");
         return deployment;
@@ -56,14 +57,14 @@ public class TemplateProcessorIT extends AbstractCommandTest {
         return new BufferedReader(new FileReader(s));
     }
 
-    private String generateHistory() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private String generateHistory() throws Exception {
         // start process
-        ObjectNode startProcessResult = (ObjectNode) evaluableShell.evaluate(
-                () -> "ex POST /process-api/runtime/process-instances {\"processDefinitionKey\":\"oneTaskProcess\",\"businessKey\":\"myBusinessKey\"}"
-        );
+        ShellScreen screen = client.sendCommand("ex POST /process-api/runtime/process-instances {\"processDefinitionKey\":\"oneTaskProcess\",\"businessKey\":\"myBusinessKey\"}");
+        ObjectNode startProcessResult = objectMapper.readValue(screen.toString(), ObjectNode.class);
         String processId = startProcessResult.get("id").asText();
         assertThat(processId).isNotEmpty();
-        ObjectNode tasks = (ObjectNode) evaluableShell.evaluate(() -> "exl POST /app/rest/query/tasks {\"processInstanceId\":\""+processId+"\"}");
+        screen = client.sendCommand("exl POST /app/rest/query/tasks {\"processInstanceId\":\""+processId+"\"}");
+        ObjectNode tasks = objectMapper.readValue(screen.toString(), ObjectNode.class);
         String taskId = tasks.get("data").get(0).get("id").asText();
         execute("exl PUT /app/rest/tasks/"+taskId+"/action/complete");
 

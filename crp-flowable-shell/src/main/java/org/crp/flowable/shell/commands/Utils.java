@@ -5,10 +5,10 @@ import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.CommandGroup;
+import org.springframework.stereotype.Component;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
@@ -17,20 +17,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-@ShellCommandGroup("Utils")
-@ShellComponent
+@CommandGroup(name = "Utils")
+@Component
 public class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
     @Autowired
     private FlowableShellProperties configuration;
 
-    @ShellMethod("Configure flowable rest endpoint.")
-    public String configure(@ShellOption(defaultValue = "") String login,
-                            @ShellOption(defaultValue = "") String password,
-                            @ShellOption(defaultValue = "") String restUrl,
-                            @ShellOption(defaultValue = "") String idmUrl,
-                            @ShellOption(defaultValue = "") String designerUrl) {
+    @Command(description = "Configure flowable rest endpoint.")
+    public String configure(@Option(longName = "login", defaultValue = "") String login,
+                            @Option(longName = "password", defaultValue = "") String password,
+                            @Option(longName = "rest-url", defaultValue = "") String restUrl,
+                            @Option(longName = "idm-url", defaultValue = "") String idmUrl,
+                            @Option(longName = "designerUrl", defaultValue = "") String designerUrl) {
         if (!StringUtils.isEmpty(login)) configuration.setLogin(login);
         if (!StringUtils.isEmpty(password)) configuration.setPassword(password);
         if (!StringUtils.isEmpty(restUrl)) {
@@ -59,15 +59,15 @@ public class Utils {
         return configuration.getLogin() + "@" + configuration.getRestURL() + "@" + configuration.getIdmURL() + "@"+configuration.getDesignerURL();
     }
 
-    @ShellMethod("Zip directory to file.")
-    public static void zip(@ShellOption String sourceDirectory, @ShellOption String targetFileName) throws IOException {
+    @Command(description = "Zip directory to file.")
+    public void zip(@Option(longName = "sourceDirectory") String sourceDirectory, @Option(longName = "targetFileName") String targetFileName) throws IOException {
         try (ZipOutputStream zipFile = new ZipOutputStream(new FileOutputStream(targetFileName))) {
             compressDirectoryToZipfile(sourceDirectory, sourceDirectory, zipFile);
         }
     }
 
-    @ShellMethod("Unzip file to directory.")
-    public static void unzip(@ShellOption String zipFile, @ShellOption String targetDirectoryName) throws IOException, IllegalAccessException {
+    @Command(description = "Unzip file to directory.")
+    public void unzip(@Option(longName = "zipFile") String zipFile, @Option(longName = "targetDirectoryName") String targetDirectoryName) throws IOException, IllegalAccessException {
         File targetDirectory = new File(targetDirectoryName);
         if (!targetDirectory.exists()) {
             createDirs(targetDirectory);
@@ -91,13 +91,13 @@ public class Utils {
         }
     }
 
-    private static void createDirs(File entryDestination) {
+    private void createDirs(File entryDestination) {
         if (!entryDestination.mkdirs()) {
             throw new RuntimeException("Directory " + entryDestination.getPath() + " was not created");
         }
     }
 
-    private static void compressDirectoryToZipfile(String rootDir, String sourceDir, ZipOutputStream out) throws IOException {
+    private void compressDirectoryToZipfile(String rootDir, String sourceDir, ZipOutputStream out) throws IOException {
         for (File file : Objects.requireNonNull(new File(sourceDir).listFiles())) {
             if (file.isDirectory()) {
                 compressDirectoryToZipfile(rootDir, sourceDir + File.separator + file.getName(), out);

@@ -11,18 +11,18 @@ import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.crp.flowable.shell.utils.RestCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.CommandGroup;
+import org.springframework.stereotype.Component;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-@ShellCommandGroup
-@ShellComponent
+@CommandGroup(name = "Deployment")
+@Component
 public class Deployment extends RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(Deployment.class);
 
@@ -32,10 +32,10 @@ public class Deployment extends RestCommand {
         this.properties = properties;
     }
 
-    @ShellMethod("Deploy given application")
-    public JsonNode deploy(@ShellOption(value= "path-to-application", optOut = true) String pathToApplication,
-                           @ShellOption(value= "deployment-name", defaultValue = "") String deploymentName,
-                           @ShellOption(value= "tenant-id", defaultValue = "") String tenantId) {
+    @Command(description = "Deploy given application")
+    public JsonNode deploy(@Option(longName = "path-to-application", required = false) String pathToApplication,
+                           @Option(longName = "deployment-name", defaultValue = "") String deploymentName,
+                           @Option(longName = "tenant-id", defaultValue = "") String tenantId) {
         String mandatoryFileName = StringUtils.isEmpty(deploymentName) ? Paths.get(pathToApplication).getFileName().toString() : deploymentName;
 
         return executeWithClient(client -> {
@@ -44,14 +44,13 @@ public class Deployment extends RestCommand {
         });
     }
 
-    @ShellMethod(value = "Delete all deployments with given name, tenantId from runtime. WARNING - use only for testing purposes",
-            key ={"rmd", "delete-deployments"})
-    public void deleteDeployments(String name, @ShellOption(defaultValue = "") String tenantId) {
+    @Command(name = {"rmd", "delete-deployments"}, description = "Delete all deployments with given name, tenantId from runtime. WARNING - use only for testing purposes")
+    public void deleteDeployments(String name, @Option(defaultValue = "") String tenantId) {
         executeWithClient(client -> deleteDeployments(client, name, tenantId));
     }
 
-    @ShellMethod(value = "list deployments", key = {"list-deployments", "lsd"})
-    public JsonNode listDeployments(@ShellOption(defaultValue = "") String name, @ShellOption(defaultValue = "") String tenantId) {
+    @Command(name = {"list-deployments", "lsd"}, description = "list deployments")
+    public JsonNode listDeployments(@Option(defaultValue = "") String name, @Option(defaultValue = "") String tenantId) {
         return executeWithClient(client -> getDeployments(client, name, tenantId));
     }
 
@@ -70,7 +69,7 @@ public class Deployment extends RestCommand {
         }
     }
 
-    protected JsonNode deleteDeployments(CloseableHttpClient client, String name, @ShellOption(defaultValue = "") String tenantId) {
+    protected JsonNode deleteDeployments(CloseableHttpClient client, String name, @Option(defaultValue = "") String tenantId) {
         JsonNode deployments = getDeployments(client, name, tenantId);
         int deploymentsSize = deployments.get("size").asInt();
         if (deploymentsSize == 0) {

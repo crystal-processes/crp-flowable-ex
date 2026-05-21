@@ -7,40 +7,40 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "crp.flowable.shell")
 public class FlowableShellProperties {
 
-    private String login;
-    private String password;
-    private String restURL;
-    private String idmURL;
+    private String login = "";
+    private String password = "";
+    private String restURL = "http://localhost:8080/flowable-ui/app-api/";
+    private String idmURL = "http://localhost:8080/flowable-idm/";
     private String sourceTestJavaDir;
 
     /**
      * prefix for modeler app definitions rest call
      */
-    private String modelerAppDefinitions;
+    private String modelerAppDefinitions = "/modeler-api/app-definitions";
     /**
      * suffix to export app models
      */
-    private String modelerExport;
+    private String modelerExport = "/modeler-api/models/";
     /**
      * suffix to export app models as bar file
      */
-    private String modelerExportBar;
+    private String modelerExportBar = "/modeler-api/models/export-bar";
     /**
      * rest endpoint for modeler models
      */
-    private String modelerModels;
-    private String modelerImport;
-    private String modelerEditorModels;
+    private String modelerModels = "/modeler-api/models";
+    private String modelerImport = "/modeler-api/models/import";
+    private String modelerEditorModels = "/modeler-api/editor/models";
 
-    private String historicActivityInstances;
-    private String processDefinitions;
+    private String historicActivityInstances = "/process-api/history/historic-activity-instances";
+    private String processDefinitions = "/process-api/repository/process-definitions";
 
     /**
      * Deployment deploy rest endpoint
      */
-    private String deploymentDeploy;
+    private String deploymentDeploy = "/app-api/app-repository/deployments";
 
-    private String designerURL;
+    private String designerURL = "https://cloud.flowable.com/design/design-api/";
     private String token;
 
     public String getModelerAppDefinitions() {

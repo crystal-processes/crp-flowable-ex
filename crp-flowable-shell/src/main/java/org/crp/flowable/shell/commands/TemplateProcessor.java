@@ -12,10 +12,10 @@ import org.crp.flowable.shell.configuration.FlowableShellProperties;
 import org.crp.flowable.shell.utils.RestCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.shell.standard.ShellCommandGroup;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.CommandGroup;
+import org.springframework.stereotype.Component;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -29,8 +29,8 @@ import java.nio.charset.StandardCharsets;
 
 import freemarker.template.TemplateException;
 
-@ShellCommandGroup
-@ShellComponent
+@CommandGroup(name = "TemplateProcessor")
+@Component
 public class TemplateProcessor extends RestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateProcessor.class);
 
@@ -45,9 +45,9 @@ public class TemplateProcessor extends RestCommand {
         this.freeMarkerConfiguration = configuration;
     }
 
-    @ShellMethod(value = "Generate test from flowable history.", key = {"gt", "generate-test"})
+    @Command(name = {"gt", "generate-test"}, description = "Generate test from flowable history.")
     public void generateTest(String processInstanceId, String className,
-                           @ShellOption(defaultValue = "java") String type, @ShellOption String sourceDir) {
+                           @Option(defaultValue = "java") String type, @Option String sourceDir) {
 
         ObjectNode processInstanceModel = createProcessInstanceModel(processInstanceId, className);
 

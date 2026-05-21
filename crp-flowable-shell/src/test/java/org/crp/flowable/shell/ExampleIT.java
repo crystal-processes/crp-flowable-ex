@@ -1,20 +1,13 @@
 package org.crp.flowable.shell;
 
 import org.apache.commons.io.FileUtils;
-import org.crp.flowable.shell.commands.Deployment;
-import org.crp.flowable.shell.commands.Model;
-import org.crp.flowable.shell.commands.Utils;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 
-
-@ContextConfiguration(classes={Deployment.class, Model.class, Utils.class})
 public class ExampleIT extends AbstractCommandTest {
     @Test
-    void deployModel() throws IOException {
+    void deployModel() throws Exception {
         //import app model to be able to export and deploy it
         execute("import --input-file-name src/test/resources/app.zip");
 

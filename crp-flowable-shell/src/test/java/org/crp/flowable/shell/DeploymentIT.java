@@ -1,14 +1,11 @@
 package org.crp.flowable.shell;
 
-import org.crp.flowable.shell.commands.Deployment;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes={Deployment.class})
 public class DeploymentIT extends AbstractCommandTest {
 
     @Test
-    void deploy() {
+    void deploy() throws Exception {
         try {
             execute("deploy src/test/resources/app.bar");
             execute("lsd app");
@@ -20,7 +17,7 @@ public class DeploymentIT extends AbstractCommandTest {
 
 
     @Test
-    void deployWithAppName() {
+    void deployWithAppName() throws Exception {
         try {
             execute("deploy src/test/resources/app.bar --deployment-name testFileName.bar");
             execute("lsd testFileName");
@@ -31,7 +28,7 @@ public class DeploymentIT extends AbstractCommandTest {
     }
 
     @Test
-    void deployWithTenant() {
+    void deployWithTenant() throws Exception {
         try {
             execute("deploy src/test/resources/app.bar --deployment-name app.bar --tenant-id testTenant");
             execute( "lsd app");
@@ -42,12 +39,12 @@ public class DeploymentIT extends AbstractCommandTest {
     }
 
     @Test
-    void deployWithoutFileName() {
+    void deployWithoutFileName() throws Exception {
         execute("deploy");
         assertScreenContainsText("Missing mandatory option '--path-to-application'");
     }
 
-    private void deleteDeployment(String deploymentName) {
+    private void deleteDeployment(String deploymentName) throws Exception {
         execute("delete-deployments " + deploymentName);
         execute("lsd "+ deploymentName);
         assertScreenContainsText("\"size\" : 0");
