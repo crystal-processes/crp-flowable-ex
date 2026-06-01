@@ -20,7 +20,7 @@
         def.key_ as key_,
         def.id_ as proc_def_id_
         FROM ${prefix}ACT_RU_ACTINST as act
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON act.proc_def_id_ = def.id_
+        JOIN ${prefix}ACT_RE_PROCDEF as def ON act.proc_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
         </if>

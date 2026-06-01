@@ -62,7 +62,7 @@
             job.proc_def_id_ as proc_def_id_,
             def.key_ as key_
         FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
+        JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
         </if>
@@ -98,7 +98,7 @@
             job.proc_def_id_ as proc_def_id_,
             def.key_ as key_
         FROM ${prefix}ACT_RU_TIMER_JOB as job
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
+        JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
         </if>
@@ -135,7 +135,7 @@
             def.key_ as key_,
             ba.bytes_ as exception_stacktrace_
         FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
+        JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
         LEFT JOIN ${prefix}ACT_GE_BYTEARRAY as ba ON job.exception_stack_id_ = ba.id_
         <if test="latestDeployments != null and latestDeployments > 0">
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_

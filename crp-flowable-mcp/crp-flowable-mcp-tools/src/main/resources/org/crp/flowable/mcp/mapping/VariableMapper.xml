@@ -27,7 +27,7 @@
             var.name_ as name_,
             var.var_type_ as type_
         FROM ${prefix}ACT_HI_VARINST as var
-        LEFT JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
+        JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
         LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
             LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
@@ -65,7 +65,7 @@
                 COUNT(*) as var_count_, 
                 def.key_
             FROM ${prefix}ACT_HI_VARINST as var
-            LEFT JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
+            JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
             LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
             <if test="latestDeployments != null and latestDeployments > 0">
                 LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
