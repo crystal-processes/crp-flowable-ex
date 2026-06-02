@@ -1,104 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.crp.flowable.mcp.mapper.ActivitiesMapper">
-    <resultMap id="longRunningTransactionResultMap"
-               type="org.crp.flowable.mcp.service.DeveloperService$LongRunningTransaction">
-        <constructor>
-            <arg column="act_id_" javaType="String"/>
-            <arg column="act_name_" javaType="String"/>
-            <arg column="transaction_order_" javaType="Long"/>
-            <arg column="key_" javaType="String"/>
-            <arg column="proc_def_id_" javaType="String"/>
-        </constructor>
-    </resultMap>
-    <resultMap id="caseActivityInfoResultMap" type="org.crp.flowable.mcp.service.DeveloperService$CaseActivityInfo">
-        <constructor>
-            <arg column="act_id_" javaType="String"/>
-            <arg column="act_name_" javaType="String"/>
-            <arg column="scope_id_" javaType="String"/>
-            <arg column="scope_type_" javaType="String"/>
-            <arg column="scope_def_id_" javaType="String"/>
-            <arg column="scope_def_key_" javaType="String"/>
-        </constructor>
-    </resultMap>
-    <select id="longRunningTransaction" resultMap="longRunningTransactionResultMap">
-        SELECT
-        act.act_id_ as act_id_,
-        act.act_name_ as act_name_,
-        act.transaction_order_ as transaction_order_,
-        def.key_ as key_,
-        def.id_ as proc_def_id_
-        FROM ${prefix}ACT_RU_ACTINST as act
-        JOIN ${prefix}ACT_RE_PROCDEF as def ON act.proc_def_id_ = def.id_
-        <if test="latestDeployments != null and latestDeployments > 0">
-            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
-        </if>
-        INNER JOIN (
-        SELECT
+
+  <resultMap id="longRunningTransactionResultMap" type="org.crp.flowable.mcp.service.DeveloperService$LongRunningTransaction">
+    <constructor>
+      <arg column="act_id_" javaType="String" />
+      <arg column="act_name_" javaType="String" />
+      <arg column="transaction_order_" javaType="Long" />
+      <arg column="key_" javaType="String" />
+      <arg column="proc_def_id_" javaType="String" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="caseActivityInfoResultMap" type="org.crp.flowable.mcp.service.DeveloperService$CaseActivityInfo">
+    <constructor>
+      <arg column="act_id_" javaType="String" />
+      <arg column="act_name_" javaType="String" />
+      <arg column="scope_id_" javaType="String" />
+      <arg column="scope_type_" javaType="String" />
+      <arg column="scope_def_id_" javaType="String" />
+      <arg column="scope_def_key_" javaType="String" />
+    </constructor>
+  </resultMap>
+
+  <select id="longRunningTransaction" resultMap="longRunningTransactionResultMap">
+    SELECT
+      act.act_id_ as act_id_,
+      act.act_name_ as act_name_,
+      act.transaction_order_ as transaction_order_,
+      def.key_ as key_,
+      def.id_ as proc_def_id_
+    FROM ${prefix}ACT_RU_ACTINST as act
+    JOIN ${prefix}ACT_RE_PROCDEF as def ON act.proc_def_id_ = def.id_
+    <if test="latestDeployments != null and latestDeployments > 0">
+      LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+    </if>
+    INNER JOIN (
+      SELECT
         act2.proc_def_id_,
         MAX(act2.transaction_order_) as max_transaction_order_
-        FROM ${prefix}ACT_RU_ACTINST as act2
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def2 ON act2.proc_def_id_ = def2.id_
-        <if test="latestDeployments != null and latestDeployments > 0">
-            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep2 ON def2.deployment_id_ = dep2.id_
+      FROM ${prefix}ACT_RU_ACTINST as act2
+      LEFT JOIN ${prefix}ACT_RE_PROCDEF as def2 ON act2.proc_def_id_ = def2.id_
+      <if test="latestDeployments != null and latestDeployments > 0">
+        LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep2 ON def2.deployment_id_ = dep2.id_
+      </if>
+      <where>
+        <if test="definitionKey != null">
+          AND def2.key_ = #{definitionKey}
         </if>
-        <where>
-            <if test="definitionKey != null">
-                AND def2.key_ = #{definitionKey}
-            </if>
-            <if test="latestDeployments != null and latestDeployments > 0">
-                AND def2.deployment_id_ IN (
-                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
-                ORDER BY deploy_time_ DESC
-                LIMIT #{latestDeployments}
-                )
-            </if>
-        </where>
-        GROUP BY act2.proc_def_id_
-        ) as max_orders ON act.proc_def_id_ = max_orders.proc_def_id_
-        AND act.transaction_order_ = max_orders.max_transaction_order_
-        <where>
-            <if test="definitionKey != null">
-                AND def.key_ = #{definitionKey}
-            </if>
-            <if test="latestDeployments != null and latestDeployments > 0">
-                AND def.deployment_id_ IN (
-                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
-                ORDER BY deploy_time_ DESC
-                LIMIT #{latestDeployments}
-                )
-            </if>
-        </where>
-    </select>
-    <select id="findCaseActivities" resultMap="caseActivityInfoResultMap">
-        SELECT
-        plan_item.id_ as act_id_,
-        plan_item.id_ as act_name_,
-        plan_item.case_inst_id_ as scope_id_,
-        'cmmn' as scope_type_,
-        case_inst.case_def_id_ as scope_def_id_,
-        def.key_ as scope_def_key_
-        FROM ${prefix}ACT_CMMN_RU_PLAN_ITEM_INST as plan_item
-        JOIN ${prefix}ACT_CMMN_RU_CASE_INST as case_inst ON plan_item.case_inst_id_ = case_inst.id_
-        JOIN ${prefix}ACT_CMMN_CASEDEF as def ON case_inst.case_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
-            LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+          AND def2.deployment_id_ IN (
+            SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+            ORDER BY deploy_time_ DESC
+            LIMIT #{latestDeployments}
+          )
         </if>
-        <where>
-            <if test="caseDefinitionKey != null">
-                AND def.key_ = #{caseDefinitionKey}
-            </if>
-            <if test="startedAfter != null">
-                AND case_inst.start_time_ >= #{startedAfter}
-            </if>
-            <if test="latestDeployments != null and latestDeployments > 0">
-                AND def.deployment_id_ IN (
-                SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
-                ORDER BY deploy_time_ DESC
-                LIMIT #{latestDeployments}
-                )
-            </if>
-        </where>
-        ORDER BY plan_item.create_time_ DESC
-    </select>
+      </where>
+      GROUP BY act2.proc_def_id_
+    ) as max_orders ON act.proc_def_id_ = max_orders.proc_def_id_
+    AND act.transaction_order_ = max_orders.max_transaction_order_
+    <where>
+      <if test="definitionKey != null">
+        AND def.key_ = #{definitionKey}
+      </if>
+      <if test="latestDeployments != null and latestDeployments > 0">
+        AND def.deployment_id_ IN (
+          SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+          ORDER BY deploy_time_ DESC
+          LIMIT #{latestDeployments}
+        )
+      </if>
+    </where>
+  </select>
+
+  <select id="findCaseActivities" resultMap="caseActivityInfoResultMap">
+    SELECT
+      plan_item.id_ as act_id_,
+      plan_item.id_ as act_name_,
+      plan_item.case_inst_id_ as scope_id_,
+      'cmmn' as scope_type_,
+      case_inst.case_def_id_ as scope_def_id_,
+      def.key_ as scope_def_key_
+    FROM ${prefix}ACT_CMMN_RU_PLAN_ITEM_INST as plan_item
+    JOIN ${prefix}ACT_CMMN_RU_CASE_INST as case_inst ON plan_item.case_inst_id_ = case_inst.id_
+    JOIN ${prefix}ACT_CMMN_CASEDEF as def ON case_inst.case_def_id_ = def.id_
+    <if test="latestDeployments != null and latestDeployments > 0">
+      LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+    </if>
+    <where>
+      <if test="caseDefinitionKey != null">
+        AND def.key_ = #{caseDefinitionKey}
+      </if>
+      <if test="startedAfter != null">
+        AND case_inst.start_time_ &gt;= #{startedAfter}
+      </if>
+      <if test="latestDeployments != null and latestDeployments > 0">
+        AND def.deployment_id_ IN (
+          SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
+          ORDER BY deploy_time_ DESC
+          LIMIT #{latestDeployments}
+        )
+      </if>
+    </where>
+    ORDER BY plan_item.create_time_ DESC
+  </select>
+
 </mapper>
