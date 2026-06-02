@@ -84,6 +84,10 @@ public class CaseQueriesTest {
     @Test
     public void caseVariablesReturnsCaseDataWithScopeType() {
         // Create case instance with variable
+        runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("oneTask")
+                .variable("processVariable", "processVariableValue")
+                .start();
         CaseInstance caseInstance = cmmnRuntimeService.createCaseInstanceBuilder()
                 .caseDefinitionKey("oneHumanTaskCase")
                 .variable("caseVariable", "caseValue")
@@ -96,7 +100,7 @@ public class CaseQueriesTest {
                     .as("caseVariables should return case data")
                     .isNotEmpty()
                     .extracting(CaseVariableInfo::scopeType, CaseVariableInfo::scopeId, CaseVariableInfo::scopeDefinitionKey, CaseVariableInfo::name, CaseVariableInfo::type)
-                    .contains(tuple("cmmn", caseInstance.getId(), "oneHumanTaskCase","caseVariable", "string"));
+                    .containsOnly(tuple("cmmn", caseInstance.getId(), "oneHumanTaskCase","caseVariable", "string"));
         } finally {
             cmmnRuntimeService.deleteCaseInstance(caseInstance.getId());
         }
