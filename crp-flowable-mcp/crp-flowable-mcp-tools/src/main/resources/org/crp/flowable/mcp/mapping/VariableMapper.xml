@@ -1,132 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.crp.flowable.mcp.mapper.VariableMapper">
-    
-    <resultMap id="variableInfoResultMap" type="org.crp.flowable.mcp.service.DeveloperService$VariableInfo">
-        <constructor>
-            <arg column="id_" javaType="String"/>
-            <arg column="key_" javaType="String"/>
-            <arg column="name_" javaType="String"/>
-            <arg column="type_" javaType="String"/>
-        </constructor>
-    </resultMap>
 
-    <resultMap id="maxVariableCountResultMap" type="org.crp.flowable.mcp.service.DeveloperService$MaxVariableCount">
-        <constructor>
-            <arg column="def_id_" javaType="String"/>
-            <arg column="key_" javaType="String"/>
-            <arg column="max_var_count" javaType="Long"/>
-        </constructor>
-    </resultMap>
-    
-    <select id="findVariableByTypes" resultMap="variableInfoResultMap">
-        SELECT
-        prc.id_ as id_,
-        prc.proc_def_id_ as def_id_,
-        def.key_ as key_,
-        var.name_ as name_,
-        var.var_type_ as type_
-        FROM ${prefix}ACT_HI_VARINST as var
-        JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
-        <if test="latestDeployments != null and latestDeployments > 0">
-            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
-        </if>
-        <where>
-            <if test="definitionKey != null">
-                AND def.key_ = #{definitionKey}
-            </if>
-            <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")"
-                     nullable="true">
-                #{type}
-            </foreach>
-            <if test="startedAfter != null">
-                AND prc.start_time_ >= #{startedAfter}
-            </if>
-            <if test="latestDeployments != null and latestDeployments > 0">
-                AND def.deployment_id_ IN (
-                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
-                ORDER BY deploy_time_ DESC
-                LIMIT #{latestDeployments}
-                )
-            </if>
-        </where>
-        GROUP BY prc.id_, prc.proc_def_id_, def.key_, var.name_, var.var_type_
-    </select>
-    
-    <select id="findMaxVariablesPerProcessDefinition" resultMap="maxVariableCountResultMap">
-        SELECT
-        proc_def_count.def_id_,
-        proc_def_count.key_,
-        MAX(proc_def_count.var_count_) as max_var_count
-        FROM (
-        SELECT
+  <resultMap id="variableInfoResultMap" type="org.crp.flowable.mcp.service.DeveloperService$VariableInfo">
+    <constructor>
+      <arg column="id_" javaType="String" />
+      <arg column="key_" javaType="String" />
+      <arg column="name_" javaType="String" />
+      <arg column="type_" javaType="String" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="maxVariableCountResultMap" type="org.crp.flowable.mcp.service.DeveloperService$MaxVariableCount">
+    <constructor>
+      <arg column="def_id_" javaType="String" />
+      <arg column="key_" javaType="String" />
+      <arg column="max_var_count" javaType="Long" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="caseVariableInfoResultMap" type="org.crp.flowable.mcp.service.DeveloperService$CaseVariableInfo">
+    <constructor>
+      <arg column="id_" javaType="String" />
+      <arg column="scope_id_" javaType="String" />
+      <arg column="scope_type_" javaType="String" />
+      <arg column="scope_def_id_" javaType="String" />
+      <arg column="scope_def_key_" javaType="String" />
+      <arg column="name_" javaType="String" />
+      <arg column="var_type_" javaType="String" />
+    </constructor>
+  </resultMap>
+
+  <select id="findVariableByTypes" resultMap="variableInfoResultMap">
+    SELECT
+      prc.id_ as id_,
+      prc.proc_def_id_ as def_id_,
+      def.key_ as key_,
+      var.name_ as name_,
+      var.var_type_ as type_
+    FROM ${prefix}ACT_HI_VARINST as var
+    JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
+    LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
+    <if test="latestDeployments != null and latestDeployments > 0">
+      LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+    </if>
+    <where>
+      <if test="definitionKey != null">
+        AND def.key_ = #{definitionKey}
+      </if>
+      <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")" nullable="true">
+        #{type}
+      </foreach>
+      <if test="startedAfter != null">
+        AND prc.start_time_ &gt;= #{startedAfter}
+      </if>
+      <if test="latestDeployments != null and latestDeployments > 0">
+        AND def.deployment_id_ IN (
+          SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+          ORDER BY deploy_time_ DESC
+          LIMIT #{latestDeployments}
+        )
+      </if>
+    </where>
+    GROUP BY prc.id_, prc.proc_def_id_, def.key_, var.name_, var.var_type_
+  </select>
+
+  <select id="findMaxVariablesPerProcessDefinition" resultMap="maxVariableCountResultMap">
+    SELECT
+      proc_def_count.def_id_,
+      proc_def_count.key_,
+      MAX(proc_def_count.var_count_) as max_var_count
+    FROM (
+      SELECT
         prc.id_,
         prc.proc_def_id_ as def_id_,
         COUNT(*) as var_count_,
         def.key_
-        FROM ${prefix}ACT_HI_VARINST as var
-        JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
-        LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
-        <if test="latestDeployments != null and latestDeployments > 0">
-            LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+      FROM ${prefix}ACT_HI_VARINST as var
+      JOIN ${prefix}ACT_HI_PROCINST as prc ON var.proc_inst_id_ = prc.id_
+      LEFT JOIN ${prefix}ACT_RE_PROCDEF as def ON prc.proc_def_id_ = def.id_
+      <if test="latestDeployments != null and latestDeployments > 0">
+        LEFT JOIN ${prefix}ACT_RE_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+      </if>
+      <where>
+        <if test="definitionKey != null">
+          AND def.key_ = #{definitionKey}
         </if>
-        <where>
-            <if test="definitionKey != null">
-                AND def.key_ = #{definitionKey}
-            </if>
-            <if test="startedAfter != null">
-                AND prc.start_time_ >= #{startedAfter}
-            </if>
-            <if test="latestDeployments != null and latestDeployments > 0">
-                AND def.deployment_id_ IN (
-                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
-                ORDER BY deploy_time_ DESC
-                LIMIT #{latestDeployments}
-                )
-            </if>
-        </where>
-        GROUP BY prc.id_, prc.proc_def_id_, def.key_
-        ) as proc_def_count
-        GROUP BY def_id_, key_
-    </select>
+        <if test="startedAfter != null">
+          AND prc.start_time_ &gt;= #{startedAfter}
+        </if>
+        <if test="latestDeployments != null and latestDeployments > 0">
+          AND def.deployment_id_ IN (
+            SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+            ORDER BY deploy_time_ DESC
+            LIMIT #{latestDeployments}
+          )
+        </if>
+      </where>
+      GROUP BY prc.id_, prc.proc_def_id_, def.key_
+    ) as proc_def_count
+    GROUP BY def_id_, key_
+  </select>
 
-    <select id="findCaseVariables" resultMap="caseVariableInfoResultMap">
-        SELECT
-        var.id_ as id_,
-        var.scope_id_ as scope_id_,
-        var.scope_type_ as scope_type_,
-        case_inst.case_def_id_ as scope_def_id_,
-        def.key_ as scope_def_key_,
-        var.name_ as name_,
-        var.var_type_ as var_type_
-        FROM ${prefix}ACT_HI_VARINST as var
-        JOIN ${prefix}ACT_CMMN_HI_CASE_INST as case_inst ON var.scope_id_ = case_inst.id_
-        JOIN ${prefix}ACT_CMMN_CASEDEF as def ON case_inst.case_def_id_ = def.id_
-        <if test="latestDeployments != null and latestDeployments > 0">
-            LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
-        </if>
-        <where>
-            <if test="caseDefinitionKey != null">
-                AND def.key_ = #{caseDefinitionKey}
-            </if>
-            <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")"
-                     nullable="true">
-                #{type}
-            </foreach>
-            <if test="startedAfter != null">
-                AND case_inst.start_time_ >= #{startedAfter}
-            </if>
-            <if test="latestDeployments != null and latestDeployments > 0">
-                AND def.deployment_id_ IN (
-                SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
-                ORDER BY deploy_time_ DESC
-                LIMIT #{latestDeployments}
-                )
-            </if>
-        </where>
-        GROUP BY var.id_, var.scope_id_, var.scope_type_, case_inst.case_def_id_, def.key_, var.name_, var.var_type_
-        ORDER BY var.create_time_ DESC
-    </select>
+  <select id="findCaseVariables" resultMap="caseVariableInfoResultMap">
+    SELECT
+      var.id_ as id_,
+      var.scope_id_ as scope_id_,
+      var.scope_type_ as scope_type_,
+      case_inst.case_def_id_ as scope_def_id_,
+      def.key_ as scope_def_key_,
+      var.name_ as name_,
+      var.var_type_ as var_type_
+    FROM ${prefix}ACT_HI_VARINST as var
+    JOIN ${prefix}ACT_CMMN_HI_CASE_INST as case_inst ON var.scope_id_ = case_inst.id_
+    JOIN ${prefix}ACT_CMMN_CASEDEF as def ON case_inst.case_def_id_ = def.id_
+    <if test="latestDeployments != null and latestDeployments > 0">
+      LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+    </if>
+    <where>
+      <if test="caseDefinitionKey != null">
+        AND def.key_ = #{caseDefinitionKey}
+      </if>
+      <foreach item="type" collection="types" open="AND var.var_type_ IN (" separator="," close=")" nullable="true">
+        #{type}
+      </foreach>
+      <if test="startedAfter != null">
+        AND case_inst.start_time_ &gt;= #{startedAfter}
+      </if>
+      <if test="latestDeployments != null and latestDeployments > 0">
+        AND def.deployment_id_ IN (
+          SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
+          ORDER BY deploy_time_ DESC
+          LIMIT #{latestDeployments}
+        )
+      </if>
+    </where>
+    GROUP BY var.id_, var.scope_id_, var.scope_type_, case_inst.case_def_id_, def.key_, var.name_, var.var_type_
+    ORDER BY var.create_time_ DESC
+  </select>
 
 </mapper>
