@@ -40,7 +40,8 @@
             <arg column="handler_type_" javaType="String"/>
             <arg column="handler_cfg_" javaType="String"/>
             <arg column="exception_message_" javaType="String"/>
-            <arg column="exception_stacktrace_" javaType="String" typeHandler="org.crp.flowable.mcp.service.ByteArrayToStringTypeHandler"/>
+            <arg column="exception_stacktrace_" javaType="String"
+                 typeHandler="org.crp.flowable.mcp.service.ByteArrayToStringTypeHandler"/>
             <arg column="create_time_" javaType="java.time.Instant"/>
             <arg column="element_id_" javaType="String"/>
             <arg column="process_instance_id_" javaType="String"/>
@@ -50,17 +51,17 @@
     </resultMap>
     
     <select id="findDeadLetterJobs" resultMap="deadLetterJobResultMap">
-        SELECT 
-            job.id_ as id_,
-            job.type_ as type_,
-            job.handler_type_ as handler_type_,
-            job.handler_cfg_ as handler_cfg_,
-            job.exception_msg_ as exception_message_,
-            job.create_time_ as create_time_,
-            job.element_id_ as element_id_,
-            job.process_instance_id_ as process_instance_id_,
-            job.proc_def_id_ as proc_def_id_,
-            def.key_ as key_
+        SELECT
+        job.id_ as id_,
+        job.type_ as type_,
+        job.handler_type_ as handler_type_,
+        job.handler_cfg_ as handler_cfg_,
+        job.exception_msg_ as exception_message_,
+        job.create_time_ as create_time_,
+        job.element_id_ as element_id_,
+        job.process_instance_id_ as process_instance_id_,
+        job.proc_def_id_ as proc_def_id_,
+        def.key_ as key_
         FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
         JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
@@ -75,9 +76,9 @@
             </if>
             <if test="latestDeployments != null and latestDeployments > 0">
                 AND def.deployment_id_ IN (
-                    SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
-                    ORDER BY deploy_time_ DESC 
-                    LIMIT #{latestDeployments}
+                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
                 )
             </if>
         </where>
@@ -85,18 +86,18 @@
     </select>
     
     <select id="findFailingRuntimeJobs" resultMap="failingRuntimeJobResultMap">
-        SELECT 
-            job.id_ as id_,
-            job.type_ as type_,
-            job.handler_type_ as handler_type_,
-            job.handler_cfg_ as handler_cfg_,
-            job.retries_ as retries_,
-            job.exception_msg_ as exception_message_,
-            job.create_time_ as create_time_,
-            job.element_id_ as element_id_,
-            job.process_instance_id_ as process_instance_id_,
-            job.proc_def_id_ as proc_def_id_,
-            def.key_ as key_
+        SELECT
+        job.id_ as id_,
+        job.type_ as type_,
+        job.handler_type_ as handler_type_,
+        job.handler_cfg_ as handler_cfg_,
+        job.retries_ as retries_,
+        job.exception_msg_ as exception_message_,
+        job.create_time_ as create_time_,
+        job.element_id_ as element_id_,
+        job.process_instance_id_ as process_instance_id_,
+        job.proc_def_id_ as proc_def_id_,
+        def.key_ as key_
         FROM ${prefix}ACT_RU_TIMER_JOB as job
         JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
         <if test="latestDeployments != null and latestDeployments > 0">
@@ -112,9 +113,9 @@
             </if>
             <if test="latestDeployments != null and latestDeployments > 0">
                 AND def.deployment_id_ IN (
-                    SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
-                    ORDER BY deploy_time_ DESC 
-                    LIMIT #{latestDeployments}
+                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
                 )
             </if>
         </where>
@@ -122,18 +123,18 @@
     </select>
 
     <select id="findDeadLetterJobDetails" resultMap="deadLetterJobDetailResultMap">
-        SELECT 
-            job.id_ as job_id_,
-            job.type_ as type_,
-            job.handler_type_ as handler_type_,
-            job.handler_cfg_ as handler_cfg_,
-            job.exception_msg_ as exception_message_,
-            job.create_time_ as create_time_,
-            job.element_id_ as element_id_,
-            job.process_instance_id_ as process_instance_id_,
-            job.proc_def_id_ as proc_def_id_,
-            def.key_ as key_,
-            ba.bytes_ as exception_stacktrace_
+        SELECT
+        job.id_ as job_id_,
+        job.type_ as type_,
+        job.handler_type_ as handler_type_,
+        job.handler_cfg_ as handler_cfg_,
+        job.exception_msg_ as exception_message_,
+        job.create_time_ as create_time_,
+        job.element_id_ as element_id_,
+        job.process_instance_id_ as process_instance_id_,
+        job.proc_def_id_ as proc_def_id_,
+        def.key_ as key_,
+        ba.bytes_ as exception_stacktrace_
         FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
         JOIN ${prefix}ACT_RE_PROCDEF as def ON job.proc_def_id_ = def.id_
         LEFT JOIN ${prefix}ACT_GE_BYTEARRAY as ba ON job.exception_stack_id_ = ba.id_
@@ -152,13 +153,125 @@
             </if>
             <if test="latestDeployments != null and latestDeployments > 0">
                 AND def.deployment_id_ IN (
-                    SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT 
-                    ORDER BY deploy_time_ DESC 
-                    LIMIT #{latestDeployments}
+                SELECT id_ FROM ${prefix}ACT_RE_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
                 )
             </if>
         </where>
         ORDER BY job.create_time_ DESC
     </select>
-    
+
+    <select id="findCaseDeadLetterJobDetails" resultMap="caseDeadLetterJobDetailResultMap">
+        SELECT
+        job.id_ as job_id_,
+        job.type_ as type_,
+        job.handler_type_ as handler_type_,
+        job.handler_cfg_ as handler_cfg_,
+        job.exception_msg_ as exception_message_,
+        job.create_time_ as create_time_,
+        job.scope_id_ as scope_id_,
+        job.scope_type_ as scope_type_,
+        job.scope_definition_id_ as scope_def_id_,
+        def.key_ as scope_def_key_,
+        ba.bytes_ as exception_stacktrace_
+        FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
+        JOIN ${prefix}ACT_CMMN_CASEDEF as def ON job.scope_definition_id_ = def.id_
+        LEFT JOIN ${prefix}ACT_GE_BYTEARRAY as ba ON job.exception_stack_id_ = ba.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        <where>
+            <if test="jobId != null">
+                AND job.id_ = #{jobId}
+            </if>
+            <if test="caseDefinitionKey != null">
+                AND def.key_ = #{caseDefinitionKey}
+            </if>
+            <if test="startedAfter != null">
+                AND job.create_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        ORDER BY job.create_time_ DESC
+    </select>
+
+    <select id="findCaseDeadLetterJobs" resultMap="caseDeadLetterJobResultMap">
+        SELECT
+        job.id_ as id_,
+        job.type_ as type_,
+        job.handler_type_ as handler_type_,
+        job.handler_cfg_ as handler_cfg_,
+        job.exception_msg_ as exception_message_,
+        job.create_time_ as create_time_,
+        job.scope_id_ as scope_id_,
+        job.scope_type_ as scope_type_,
+        job.scope_definition_id_ as scope_def_id_,
+        def.key_ as scope_def_key_
+        FROM ${prefix}ACT_RU_DEADLETTER_JOB as job
+        JOIN ${prefix}ACT_CMMN_CASEDEF as def ON job.scope_definition_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        <where>
+            <if test="caseDefinitionKey != null">
+                AND def.key_ = #{caseDefinitionKey}
+            </if>
+            <if test="startedAfter != null">
+                AND job.create_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        ORDER BY job.create_time_ DESC
+    </select>
+
+    <select id="findCaseFailingRuntimeJobs" resultMap="caseFailingRuntimeJobResultMap">
+        SELECT
+        job.id_ as id_,
+        job.type_ as type_,
+        job.handler_type_ as handler_type_,
+        job.handler_cfg_ as handler_cfg_,
+        job.retries_ as retries_,
+        job.exception_msg_ as exception_message_,
+        job.create_time_ as create_time_,
+        job.scope_id_ as scope_id_,
+        job.scope_type_ as scope_type_,
+        job.scope_definition_id_ as scope_def_id_,
+        def.key_ as scope_def_key_
+        FROM ${prefix}ACT_RU_JOB as job
+        JOIN ${prefix}ACT_CMMN_CASEDEF as def ON job.scope_definition_id_ = def.id_
+        <if test="latestDeployments != null and latestDeployments > 0">
+            LEFT JOIN ${prefix}ACT_CMMN_DEPLOYMENT as dep ON def.deployment_id_ = dep.id_
+        </if>
+        <where>
+            AND job.exception_msg_ IS NOT NULL
+            <if test="caseDefinitionKey != null">
+                AND def.key_ = #{caseDefinitionKey}
+            </if>
+            <if test="startedAfter != null">
+                AND job.create_time_ >= #{startedAfter}
+            </if>
+            <if test="latestDeployments != null and latestDeployments > 0">
+                AND def.deployment_id_ IN (
+                SELECT id_ FROM ${prefix}ACT_CMMN_DEPLOYMENT
+                ORDER BY deploy_time_ DESC
+                LIMIT #{latestDeployments}
+                )
+            </if>
+        </where>
+        ORDER BY job.create_time_ DESC
+    </select>
+
 </mapper>

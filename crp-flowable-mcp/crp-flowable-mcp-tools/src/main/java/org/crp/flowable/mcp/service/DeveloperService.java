@@ -102,6 +102,86 @@ public class DeveloperService {
     public record LongRunningTransaction(String actId, String actName, Long transactionOrder,
                                           String key, String procDefId) {}
 
+    /**
+     * Case variable information.
+     * @param id variable ID
+     * @param scopeId case instance ID (scope ID)
+     * @param scopeType scope type (e.g., "cmmn")
+     * @param scopeDefinitionId case definition ID (scope definition ID)
+     * @param scopeDefinitionKey case definition key
+     * @param name variable name
+     * @param type variable type
+     */
+    public record CaseVariableInfo(String id, String scopeId, String scopeType, String scopeDefinitionId,
+                                   String scopeDefinitionKey, String name, String type) {}
+
+    /**
+     * Case activity information.
+     * @param actId activity ID
+     * @param actName activity name
+     * @param scopeId case instance ID (scope ID)
+     * @param scopeType scope type (e.g., "cmmn")
+     * @param scopeDefinitionId case definition ID (scope definition ID)
+     * @param scopeDefinitionKey case definition key
+     */
+    public record CaseActivityInfo(String actId, String actName, String scopeId, String scopeType,
+                                   String scopeDefinitionId, String scopeDefinitionKey) {}
+
+    /**
+     * Case dead letter job information.
+     * @param id job ID
+     * @param type job type
+     * @param handlerType job handler type
+     * @param handlerConfig job handler configuration
+     * @param exceptionMessage exception message from the last failure
+     * @param createTime when the job was created
+     * @param scopeId case instance ID (scope ID)
+     * @param scopeType scope type (e.g., "cmmn")
+     * @param scopeDefinitionId case definition ID (scope definition ID)
+     * @param scopeDefinitionKey case definition key
+     */
+    public record CaseDeadLetterJob(String id, String type, String handlerType, String handlerConfig,
+                                     String exceptionMessage, Instant createTime, String scopeId,
+                                     String scopeType, String scopeDefinitionId, String scopeDefinitionKey) {}
+
+    /**
+     * Detailed case dead letter job information including full exception stacktrace.
+     * @param jobId job ID
+     * @param type job type
+     * @param handlerType job handler type
+     * @param handlerConfig job handler configuration
+     * @param exceptionMessage exception message from the last failure
+     * @param exceptionStacktrace the full exception stacktrace as a string
+     * @param createTime when the job was created
+     * @param scopeId case instance ID (scope ID)
+     * @param scopeType scope type (e.g., "cmmn")
+     * @param scopeDefinitionId case definition ID (scope definition ID)
+     * @param scopeDefinitionKey case definition key
+     */
+    public record CaseDeadLetterJobDetail(String jobId, String type, String handlerType, String handlerConfig,
+                                          String exceptionMessage, String exceptionStacktrace, Instant createTime,
+                                          String scopeId, String scopeType, String scopeDefinitionId,
+                                          String scopeDefinitionKey) {}
+
+    /**
+     * Case failing runtime job information.
+     * @param id job ID
+     * @param type job type
+     * @param handlerType job handler type
+     * @param handlerConfig job handler configuration
+     * @param retries number of retries remaining
+     * @param exceptionMessage exception message from the last failure
+     * @param createTime when the job was created
+     * @param scopeId case instance ID (scope ID)
+     * @param scopeType scope type (e.g., "cmmn")
+     * @param scopeDefinitionId case definition ID (scope definition ID)
+     * @param scopeDefinitionKey case definition key
+     */
+    public record CaseFailingRuntimeJob(String id, String type, String handlerType, String handlerConfig,
+                                        Integer retries, String exceptionMessage, Instant createTime,
+                                        String scopeId, String scopeType, String scopeDefinitionId,
+                                        String scopeDefinitionKey) {}
+
     @Tool(description = """
             Provides maximum variable count per process instance.
             Too many variables can indicate design issue.
@@ -120,7 +200,7 @@ public class DeveloperService {
             throw new RuntimeException(e);
         }
     }
-    
+
     private <T> List<T> getSelectList(SqlSession sqlSession, String statement, Object params) {
         return sqlSession.selectList(statement, params, new RowBounds(0, 50));
     }
@@ -145,7 +225,6 @@ public class DeveloperService {
             throw new RuntimeException(e);
         }
     }
-
 
 
     @Tool(description = """
@@ -227,6 +306,111 @@ public class DeveloperService {
         }
     }
 
+    @Tool(description = """
+            Provides list of case variables.
+            Variables are ordered by createTime DESC.
+            scopeId is the case instance ID.
+            """)
+    public List<CaseVariableInfo> caseVariables(
+            @ToolParam(description = "Case definition key to filter by", required = false) String caseDefinitionKey,
+            @ToolParam(description = "Variable types to filter by", required = false) Collection<String> types,
+            @ToolParam(description = "Minimum case start time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findCaseVariables", ParametersBuilder.create()
+                    .add("caseDefinitionKey", caseDefinitionKey)
+                    .add("types", types)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Tool(description = """
+            Provides list of case dead letter jobs.
+            Jobs are ordered by createTime DESC.
+            scopeId is the case instance ID.
+            """)
+    public List<CaseDeadLetterJob> caseDeadLetterJobs(
+            @ToolParam(description = "Case definition key to filter by", required = false) String caseDefinitionKey,
+            @ToolParam(description = "Minimum job creation time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findCaseDeadLetterJobs", ParametersBuilder.create()
+                    .add("caseDefinitionKey", caseDefinitionKey)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Tool(description = """
+            Provides detailed information about case dead letter jobs including the full exception stacktrace.
+            Jobs are ordered by createTime DESC.
+            scopeId is the case instance ID.
+            """)
+    public List<CaseDeadLetterJobDetail> caseDeadLetterJobDetails(
+            @ToolParam(description = "Specific dead letter job ID to retrieve", required = false) String jobId,
+            @ToolParam(description = "Case definition key to filter by", required = false) String caseDefinitionKey,
+            @ToolParam(description = "Minimum job creation time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findCaseDeadLetterJobDetails", ParametersBuilder.create()
+                    .add("jobId", jobId)
+                    .add("caseDefinitionKey", caseDefinitionKey)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Tool(description = """
+            Provides list of case failing runtime jobs.
+            Jobs are ordered by createTime DESC.
+            Only jobs with exception_msg_ are returned.
+            scopeId is the case instance ID.
+            """)
+    public List<CaseFailingRuntimeJob> caseFailingRuntimeJobs(
+            @ToolParam(description = "Case definition key to filter by", required = false) String caseDefinitionKey,
+            @ToolParam(description = "Minimum job creation time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findCaseFailingRuntimeJobs", ParametersBuilder.create()
+                    .add("caseDefinitionKey", caseDefinitionKey)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Tool(description = """
+            Provides list of case activities.
+            Activities are ordered by createTime DESC.
+            scopeId is the case instance ID.
+            """)
+    public List<CaseActivityInfo> caseActivities(
+            @ToolParam(description = "Case definition key to filter by", required = false) String caseDefinitionKey,
+            @ToolParam(description = "Minimum case start time", required = false) Instant startedAfter,
+            @ToolParam(description = "Limit results to most recent deployments (null or <=0 means all, 1 the latest)", required = false) Integer latestDeployments) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            return getSelectList(sqlSession, "findCaseActivities", ParametersBuilder.create()
+                    .add("caseDefinitionKey", caseDefinitionKey)
+                    .add("startedAfter", startedAfter)
+                    .add("latestDeployments", latestDeployments)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static class ParametersBuilder {
         Map<String, Object> parameters;
 
@@ -250,4 +434,3 @@ public class DeveloperService {
         }
     }
 }
-
