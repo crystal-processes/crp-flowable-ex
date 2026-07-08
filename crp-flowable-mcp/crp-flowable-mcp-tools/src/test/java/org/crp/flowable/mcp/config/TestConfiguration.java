@@ -4,7 +4,6 @@ import org.flowable.cmmn.api.*;
 import org.flowable.cmmn.engine.CmmnEngine;
 import org.flowable.cmmn.engine.CmmnEngineConfiguration;
 import org.flowable.cmmn.engine.CmmnEngines;
-import org.flowable.cmmn.spring.CmmnEngineFactoryBean;
 import org.flowable.cmmn.spring.SpringCmmnEngineConfiguration;
 import org.flowable.cmmn.spring.configurator.SpringCmmnEngineConfigurator;
 import org.flowable.common.engine.impl.history.HistoryLevel;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -30,17 +28,6 @@ import java.util.function.Consumer;
 @Configuration
 @Import(CrpFlowableMcpToolsConfiguration.class)
 public class TestConfiguration {
-    @Value("${jdbc.url:jdbc:h2:mem:flowable;DB_CLOSE_DELAY=1000}")
-    protected String jdbcUrl;
-
-    @Value("${jdbc.driver:org.h2.Driver}")
-    protected String jdbcDriver;
-
-    @Value("${jdbc.username:sa}")
-    protected String jdbcUsername;
-
-    @Value("${jdbc.password:}")
-    protected String jdbcPassword;
 
     @Bean
     public DataSource dataSource() {
