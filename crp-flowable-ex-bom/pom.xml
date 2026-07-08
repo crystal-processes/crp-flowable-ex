@@ -9,12 +9,27 @@
 
     <artifactId>crp-flowable-ex-bom</artifactId>
     <name>crp-flowable-ex-bom</name>
+    <url>https://github.com/crystal-processes/crp-flowable-ex/</url>
+    <description>Business process management project extensions for flowable</description>
     <packaging>pom</packaging>
     <scm>
         <developerConnection>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</developerConnection>
         <url>scm:git:https://github.com/crystal-processes/crp-flowable-ex.git</url>
       <tag>crp-flowable-ex-0.0.11</tag>
   </scm>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Martin Grofcik</name>
+            <email>mgrofcik@gmail.com</email>
+            <organization>crystal processes</organization>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
