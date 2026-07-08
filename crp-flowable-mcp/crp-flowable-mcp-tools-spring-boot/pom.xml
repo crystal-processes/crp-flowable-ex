@@ -7,6 +7,7 @@
         <version>0.0.12-SNAPSHOT</version>
     </parent>
 
+    <name>crp-flowable-mcp-tools-spring-boot</name>
     <artifactId>crp-flowable-mcp-tools-spring-boot</artifactId>
 
     <properties>
