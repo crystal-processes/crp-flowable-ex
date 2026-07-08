@@ -1,16 +1,20 @@
 package org.crp.flowable.mcp.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Configuration properties for Flowable MCP (Message Correlation Protocol) server.
  * Controls server behavior, database table prefixes, and mapping configurations.
+ * Properties can be configured via Spring's Environment (e.g., system properties, 
+ * environment variables, or property files).
  */
-@ConfigurationProperties(prefix = "crp.flowable.mcp")
-public class FlowableMcpProperties {
-    
-    private boolean enabled=true;
+public class CrpFlowableMcpProperties {
+
+    @Value("${cpr.flowable.mcp.enabled:false}")
+    private boolean enabled=false;
+    @Value("${crp.flowable.mcp.datatable-prefix:}")
     private String datatablePrefix ="";
+    @Value("${crp.flowable.mcp.mapping-config:org/crp/flowable/mcp/mapping/mappings.xml}")
     private String mappingConfig = "org/crp/flowable/mcp/mapping/mappings.xml";
     
     /**

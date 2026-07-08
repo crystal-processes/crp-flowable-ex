@@ -134,6 +134,7 @@ function TasksTab({ tasks, selectedTask, setSelectedTask, loading, fetchTasks, o
                 onFormSubmit={handleFormSubmit}
                 onFormClose={handleFormClose}
                 onNavigateToInstance={onNavigateToInstance}
+                fetchTasks={() => fetchTasks(showFinishedTasks, taskFilter, taskFilterType)}
               />
             ))}
           </div>

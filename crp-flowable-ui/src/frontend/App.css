@@ -629,6 +629,49 @@ header {
   color: #a0aec0;
 }
 
+/* No Form Message */
+.no-form-message {
+  padding: 15px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.no-form-message p {
+  margin: 10px 0;
+}
+
+.complete-error {
+  color: #ff6b6b;
+  font-size: 0.9em;
+  margin: 10px 0;
+  padding: 8px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 4px;
+}
+
+.complete-task-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.complete-task-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.complete-task-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Processes List */
 .processes-list {
   display: grid;

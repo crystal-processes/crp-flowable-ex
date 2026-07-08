@@ -10,7 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
+@CrpMcpTest
 public class McpToolsEnabledTest {
     @Nested
     @TestPropertySource(properties = "crp.flowable.mcp.enabled=false")

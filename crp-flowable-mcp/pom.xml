@@ -15,6 +15,7 @@
 
     <modules>
         <module>crp-flowable-mcp-tools</module>
+        <module>crp-flowable-mcp-tools-spring-boot</module>
         <module>crp-flowable-mcp-server</module>
         <module>crp-flowable-mcp-sse</module>
     </modules>

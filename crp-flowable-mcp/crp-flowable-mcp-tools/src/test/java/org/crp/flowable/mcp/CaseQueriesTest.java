@@ -6,6 +6,8 @@ import org.flowable.cmmn.api.CmmnRepositoryService;
 import org.flowable.cmmn.api.CmmnRuntimeService;
 import org.flowable.cmmn.api.repository.CmmnDeployment;
 import org.flowable.cmmn.api.runtime.CaseInstance;
+import org.flowable.cmmn.engine.CmmnEngineConfiguration;
+import org.flowable.cmmn.engine.test.impl.CmmnJobTestHelper;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -269,10 +271,10 @@ public class CaseQueriesTest {
      * Tests that caseDeadLetterJobs filters by caseDefinitionKey.
      */
     @Test
-    public void caseDeadLetterJobsFiltersByCaseDefinitionKey() {
+    public void caseDeadLetterJobsFiltersByCaseDefinitionKey(CmmnEngineConfiguration configuration) {
         CaseInstance caseInstance = cmmnRuntimeService.createCaseInstanceBuilder().caseDefinitionKey("failingServiceTask")
                 .start();
-        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+        CmmnJobTestHelper.waitForJobExecutorOnCondition(configuration,
                 60_000, 500L,
                 () -> managementService.createDeadLetterJobQuery().scopeId(caseInstance.getId()).count() > 0);
 
@@ -334,11 +336,11 @@ public class CaseQueriesTest {
      * Tests that caseFailingRuntimeJobs filters by caseDefinitionKey.
      */
     @Test
-    public void caseFailingRuntimeJobsFiltersByCaseDefinitionKey() {
+    public void caseFailingRuntimeJobsFiltersByCaseDefinitionKey(CmmnEngineConfiguration configuration) {
         CaseInstance caseInstance = cmmnRuntimeService.createCaseInstanceBuilder().caseDefinitionKey("failingServiceTask")
                 .variable("failedJobRetryTimeCycle", "R1/PT1S")
                 .start();
-        JobTestHelper.waitForJobExecutorOnCondition(processEngineConfiguration,
+        CmmnJobTestHelper.waitForJobExecutorOnCondition(configuration,
                 60_000, 500L,
                 () -> managementService.createTimerJobQuery().scopeId(caseInstance.getId()).count() > 0);
 

@@ -1,5 +1,6 @@
-import React, { memo } from 'react'
+import React, { memo, useState } from 'react'
 import FormEngine from '../FormEngine'
+import { makeAuthenticatedRequest } from '../utils/api'
 
 const TaskItem = memo(function TaskItem({
   task,
@@ -8,8 +9,13 @@ const TaskItem = memo(function TaskItem({
   onDeselect,
   onFormSubmit,
   onFormClose,
-  onNavigateToInstance
+  onNavigateToInstance,
+  onTaskComplete,
+  fetchTasks
 }) {
+  const [completing, setCompleting] = useState(false)
+  const [completeError, setCompleteError] = useState(null)
+
   const handleToggle = (e) => {
     if (isSelected) {
       e.stopPropagation()
@@ -22,6 +28,55 @@ const TaskItem = memo(function TaskItem({
   const handleNavigate = (e) => {
     e.stopPropagation()
     onNavigateToInstance(task.processInstanceId)
+  }
+
+  const handleCompleteTask = async (e) => {
+    e.stopPropagation()
+    setCompleting(true)
+    setCompleteError(null)
+
+    try {
+      const response = await makeAuthenticatedRequest(
+        `/process-api/runtime/tasks/${task.id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'complete'
+          })
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to complete task: ${response.statusText}`)
+      }
+
+      console.log('Task completed successfully:', task.id)
+      
+      // Notify parent component if callback is provided
+      if (onTaskComplete) {
+        onTaskComplete(task)
+      }
+      
+      // Refresh the task list
+      if (fetchTasks) {
+        fetchTasks()
+      }
+      
+      // Close the task details after a short delay
+      setTimeout(() => {
+        if (onDeselect) {
+          onDeselect()
+        }
+      }, 500)
+    } catch (err) {
+      console.error('Error completing task:', err)
+      setCompleteError(err.message)
+    } finally {
+      setCompleting(false)
+    }
   }
 
   return (
@@ -82,7 +137,19 @@ const TaskItem = memo(function TaskItem({
               onClose={onFormClose}
             />
           ) : (
-            <div className="no-form-message">No form available for this task</div>
+            <div className="no-form-message">
+              <p>No form available for this task</p>
+              {completeError && (
+                <p className="complete-error">{completeError}</p>
+              )}
+              <button
+                onClick={handleCompleteTask}
+                disabled={completing}
+                className="complete-task-btn"
+              >
+                {completing ? 'Completing...' : 'Complete Task'}
+              </button>
+            </div>
           )}
         </div>
       )}
