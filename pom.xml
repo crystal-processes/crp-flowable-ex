@@ -271,5 +271,6 @@
     <module>crp-flowable-mcp</module>
     <module>crp-flowable-ui</module>
     <module>crp-flowable-ex-bom</module>
+    <module>crp-flowable-content</module>
   </modules>
 </project>

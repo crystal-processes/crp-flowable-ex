@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.crystal-processes</groupId>
+        <artifactId>crp-flowable-ex</artifactId>
+        <version>0.0.12-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>crp-flowable-content</artifactId>
+
+    <name>crp-flowable-content</name>
+    <description>Multi-module project to cover crp flowable Content Servers.</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>crp-flowable-content-engine</module>
+        <module>crp-flowable-content-engine-configurator</module>
+        <module>crp-flowable-content-rest</module>
+        <module>crp-flowable-content-spring</module>
+        <module>crp-flowable-content-spring-configurator</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+        </dependencies>
+    </dependencyManagement>
+</project>
