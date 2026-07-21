@@ -4,20 +4,19 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<name>Flowable - Content - REST</name>
-	<artifactId>flowable-content-rest</artifactId>
+	<name>CRP Flowable - Content - REST</name>
+	<artifactId>crp-flowable-content-rest</artifactId>
 	<packaging>jar</packaging>
 
 	<parent>
-		<groupId>org.flowable</groupId>
-		<artifactId>flowable-root</artifactId>
-		<relativePath>../..</relativePath>
-		<version>6.8.1.36</version>
+		<groupId>io.github.crystal-processes</groupId>
+		<artifactId>crp-flowable-content</artifactId>
+		<version>0.0.12-SNAPSHOT</version>
 	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jetty.version>9.4.48.v20220622</jetty.version>
+		<jetty.version>11.0.21</jetty.version>
 		<flowable.artifact>
 			org.flowable.content.rest
 		</flowable.artifact>
@@ -94,11 +93,22 @@
 			<groupId>org.flowable</groupId>
 			<artifactId>flowable-common-rest</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.flowable</groupId>
 			<artifactId>flowable-content-engine</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-content-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-engine-common-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-rest</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -121,17 +131,16 @@
 		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>jsr250-api</artifactId>
-			<version>1.0</version>
 		</dependency>
 		
 		<dependency>
-      		<groupId>io.swagger</groupId>
-      		<artifactId>swagger-annotations</artifactId>
-    	</dependency>
-    	<dependency>
-      		<groupId>io.swagger</groupId>
-      		<artifactId>swagger-models</artifactId>
-    	</dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-models</artifactId>
+		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>
