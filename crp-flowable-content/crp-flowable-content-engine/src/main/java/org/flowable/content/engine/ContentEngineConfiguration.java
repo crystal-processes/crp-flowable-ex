@@ -12,21 +12,12 @@
  */
 package org.flowable.content.engine;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.transaction.TransactionFactory;
-import org.flowable.common.engine.impl.AbstractEngineConfiguration;
+import org.flowable.common.engine.impl.AbstractBuildableEngineConfiguration;
 import org.flowable.common.engine.impl.cfg.BeansConfigurationHelper;
 import org.flowable.common.engine.impl.db.DbSqlSessionFactory;
+import org.flowable.common.engine.impl.db.SchemaManager;
 import org.flowable.common.engine.impl.interceptor.CommandInterceptor;
 import org.flowable.common.engine.impl.interceptor.EngineConfigurationConstants;
 import org.flowable.common.engine.impl.interceptor.SessionFactory;
@@ -34,17 +25,13 @@ import org.flowable.common.engine.impl.persistence.entity.TableDataManager;
 import org.flowable.common.engine.impl.runtime.Clock;
 import org.flowable.common.engine.impl.tenant.ChangeTenantIdManager;
 import org.flowable.common.engine.impl.tenant.MyBatisChangeTenantIdManager;
-import org.flowable.content.api.ContentChangeTenantIdEntityTypes;
-import org.flowable.content.api.ContentEngineConfigurationApi;
-import org.flowable.content.api.ContentManagementService;
-import org.flowable.content.api.ContentService;
-import org.flowable.content.api.ContentStorage;
+import org.flowable.content.api.*;
 import org.flowable.content.engine.impl.ContentEngineImpl;
+import org.flowable.content.engine.impl.ContentEnginePostEngineBuildConsumer;
 import org.flowable.content.engine.impl.ContentManagementServiceImpl;
 import org.flowable.content.engine.impl.ContentServiceImpl;
 import org.flowable.content.engine.impl.cfg.StandaloneContentEngineConfiguration;
 import org.flowable.content.engine.impl.cfg.StandaloneInMemContentEngineConfiguration;
-import org.flowable.content.engine.impl.cmd.SchemaOperationsContentEngineBuild;
 import org.flowable.content.engine.impl.db.ContentDbSchemaManager;
 import org.flowable.content.engine.impl.db.EntityDependencyOrder;
 import org.flowable.content.engine.impl.fs.SimpleFileSystemContentStorage;
@@ -53,11 +40,15 @@ import org.flowable.content.engine.impl.persistence.entity.ContentItemEntityMana
 import org.flowable.content.engine.impl.persistence.entity.data.ContentItemDataManager;
 import org.flowable.content.engine.impl.persistence.entity.data.impl.MybatisContentItemDataManager;
 
-public class ContentEngineConfiguration extends AbstractEngineConfiguration implements ContentEngineConfigurationApi {
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.InputStream;
+import java.util.*;
+import java.util.function.Consumer;
+
+public class ContentEngineConfiguration extends AbstractBuildableEngineConfiguration<ContentEngine> implements ContentEngineConfigurationApi {
 
     public static final String DEFAULT_MYBATIS_MAPPING_FILE = "org/flowable/content/db/mapping/mappings.xml";
-
-    public static final String LIQUIBASE_CHANGELOG_PREFIX = "ACT_CO_";
 
     protected String contentEngineName = ContentEngines.NAME_DEFAULT;
 
@@ -118,9 +109,14 @@ public class ContentEngineConfiguration extends AbstractEngineConfiguration impl
         return new ContentEngineImpl(this);
     }
 
+    @Override
+    protected ContentEngine createEngine() {
+        return new ContentEngineImpl(this);
+    }
+
     // init
     // /////////////////////////////////////////////////////////////////////
-
+    @Override
     protected void init() {
         initEngineConfigurations();
         initClock();
@@ -152,6 +148,11 @@ public class ContentEngineConfiguration extends AbstractEngineConfiguration impl
         initEntityManagers();
         initContentStorage();
         initChangeTenantIdManager();
+    }
+
+    @Override
+    protected Consumer<ContentEngine> createPostEngineBuildConsumer() {
+        return new ContentEnginePostEngineBuildConsumer();
     }
 
     // services
@@ -211,20 +212,10 @@ public class ContentEngineConfiguration extends AbstractEngineConfiguration impl
     // data model ///////////////////////////////////////////////////////////////
 
     @Override
-    public void initSchemaManager() {
-        super.initSchemaManager();
-        if (this.schemaManager == null) {
-            this.schemaManager = new ContentDbSchemaManager();
-        }
+    protected SchemaManager createEngineSchemaManager() {
+        return new ContentDbSchemaManager();
     }
-    
-    public void initSchemaManagementCommand() {
-        if (schemaManagementCmd == null) {
-            if (usingRelationalDatabase && databaseSchemaUpdate != null) {
-                this.schemaManagementCmd = new SchemaOperationsContentEngineBuild();
-            }
-        }
-    }
+
 
     // session factories ////////////////////////////////////////////////////////
 

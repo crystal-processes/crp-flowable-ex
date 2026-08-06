@@ -16,8 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.flowable.content.api.ContentItem;
-import org.flowable.content.api.ContentService;
+import org.flowable.common.engine.impl.test.EnsureCleanDbUtils;
 import org.flowable.content.engine.ContentEngine;
 import org.flowable.content.engine.ContentEngineConfiguration;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ public abstract class ContentTestHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentTestHelper.class);
 
-    public static final String EMPTY_LINE = "\n";
+    public static final List<String> TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK = List.of();
 
     static Map<String, ContentEngine> contentEngines = new HashMap<>();
 
@@ -64,11 +63,14 @@ public abstract class ContentTestHelper {
      */
     public static void assertAndEnsureCleanDb(ContentEngine contentEngine) {
         LOGGER.debug("verifying that db is clean after test");
-        ContentService contentService = contentEngine.getContentEngineConfiguration().getContentService();
-        List<ContentItem> items = contentService.createContentItemQuery().list();
-        if (items != null && !items.isEmpty()) {
-            throw new AssertionError("ContentItem is not empty");
-        }
+        EnsureCleanDbUtils.assertAndEnsureCleanDb(
+                "",
+                LOGGER,
+                contentEngine.getContentEngineConfiguration(),
+                TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK,
+                true,
+                contentEngine.getContentEngineConfiguration().getSchemaManagementCmd()
+        );
     }
 
 }

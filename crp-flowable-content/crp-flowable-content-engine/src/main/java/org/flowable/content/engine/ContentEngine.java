@@ -12,11 +12,12 @@
  */
 package org.flowable.content.engine;
 
+import org.flowable.common.engine.api.Engine;
 import org.flowable.common.engine.impl.FlowableVersions;
 import org.flowable.content.api.ContentManagementService;
 import org.flowable.content.api.ContentService;
 
-public interface ContentEngine {
+public interface ContentEngine extends Engine {
 
     /**
      * the version of the flowable content library

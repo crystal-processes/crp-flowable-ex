@@ -12,58 +12,69 @@
  */
 package org.flowable.content.engine.impl.db;
 
-import org.flowable.common.engine.impl.db.EngineDatabaseConfiguration;
-import org.flowable.common.engine.impl.db.LiquibaseBasedSchemaManager;
-import org.flowable.common.engine.impl.db.LiquibaseDatabaseConfiguration;
-import org.flowable.common.engine.impl.db.SchemaManager;
-import org.flowable.content.engine.ContentEngineConfiguration;
+import org.apache.commons.lang3.StringUtils;
+import org.flowable.common.engine.impl.db.EngineSchemaManagerLockConfiguration;
+import org.flowable.common.engine.impl.db.EngineSqlScriptBasedDbSchemaManager;
+import org.flowable.content.engine.ContentEngine;
 import org.flowable.content.engine.impl.util.CommandContextUtil;
 
-public class ContentDbSchemaManager extends LiquibaseBasedSchemaManager {
-    
-    public static final String LIQUIBASE_CHANGELOG = "org/flowable/content/db/liquibase/flowable-content-db-changelog.xml";
+import java.util.Map;
 
+public class ContentDbSchemaManager extends EngineSqlScriptBasedDbSchemaManager {
+
+    protected static final String CONTENT_DB_SCHEMA_LOCK_NAME = "contentDbSchemaLock";
+    protected static final Map<String, String> changeLogVersionMap = Map.ofEntries(
+            Map.entry("1", "6.0.0.5"),
+            Map.entry("2", "6.1.1.0"),
+            Map.entry("3", "6.3.0.0"),
+            Map.entry("4", "6.3.1.0"),
+            Map.entry("5", "6.4.0.0"),
+            Map.entry("6", "6.4.1.3"),
+            Map.entry("7", "6.6.0.0"),
+            Map.entry("8", "6.6.0.0"),
+            Map.entry("9", "6.8.0.0"),
+            Map.entry("10", "7.1.0.0")
+    );
     public ContentDbSchemaManager() {
-        super("content", LIQUIBASE_CHANGELOG, ContentEngineConfiguration.LIQUIBASE_CHANGELOG_PREFIX);
+        super("content", new EngineSchemaManagerLockConfiguration(CommandContextUtil::getContentEngineConfiguration));
     }
 
     @Override
-    protected LiquibaseDatabaseConfiguration getDatabaseConfiguration() {
-        return new EngineDatabaseConfiguration(CommandContextUtil.getContentEngineConfiguration());
-    }
-
-    public void initSchema() {
-        initSchema(CommandContextUtil.getContentEngineConfiguration().getDatabaseSchemaUpdate());
+    protected String getResourcesRootDirectory() {
+        return "org/flowable/content/db";
     }
 
     @Override
-    public void schemaCreate() {
-        getCommonSchemaManager().schemaCreate();
-        super.schemaCreate();
+    protected String getEngineVersion() {
+        return ContentEngine.VERSION;
     }
 
     @Override
-        public void schemaDrop() {
-        try {
-            super.schemaDrop();
-        } catch (Exception e) {
-            logger.info("Error dropping content engine tables", e);
+    protected String getSchemaVersionPropertyName() {
+        return "content.schema.version";
+    }
+
+    @Override
+    protected String getDbSchemaLockName() {
+        return CONTENT_DB_SCHEMA_LOCK_NAME;
+    }
+
+    @Override
+    protected String getEngineTableName() {
+        return "ACT_CO_CONTENT_ITEM";
+    }
+
+    @Override
+    protected String getChangeLogTableName() {
+        return "ACT_CO_DATABASECHANGELOG";
+    }
+
+    @Override
+    protected String getDbVersionForChangelogVersion(String changeLogVersion) {
+        if (StringUtils.isNotEmpty(changeLogVersion) && changeLogVersionMap.containsKey(changeLogVersion)) {
+            return changeLogVersionMap.get(changeLogVersion);
         }
-
-        try {
-            getCommonSchemaManager().schemaDrop();
-        } catch (Exception e) {
-            logger.info("Error dropping common tables", e);
-        }
+        return "5.99.0.0";
     }
 
-    @Override
-    public String schemaUpdate() {
-        getCommonSchemaManager().schemaUpdate();
-        return super.schemaUpdate();
-    }
-
-    protected SchemaManager getCommonSchemaManager() {
-        return CommandContextUtil.getContentEngineConfiguration().getCommonSchemaManager();
-    }
 }
