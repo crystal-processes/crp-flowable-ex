@@ -3,6 +3,8 @@ package org.crp.flowable.groovy.script;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.flowable.bpmn.model.FlowableListener;
+import org.flowable.bpmn.model.FieldExtension;
 import org.flowable.bpmn.model.ScriptTask;
 import org.flowable.common.engine.api.variable.VariableContainer;
 import org.flowable.common.engine.impl.AbstractEngineConfiguration;
@@ -14,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author martin.grofcik
@@ -59,7 +62,7 @@ public class ProcessScriptFileNameResolverFactory implements ResolverFactory {
                 File file = new File(prefixPath + fileName);
                 try {
                     FileUtils.touch(file);
-                    String script = ((ScriptTask) execution.getCurrentFlowElement()).getScript();
+                    String script = getScriptFromContext(execution);
                     try (ByteArrayInputStream scriptInputStream = new ByteArrayInputStream(script.getBytes())) {
                         try (FileInputStream fileInputStream = new FileInputStream(file)) {
                             if (!IOUtils.contentEquals(scriptInputStream, fileInputStream)) {
@@ -75,20 +78,70 @@ public class ProcessScriptFileNameResolverFactory implements ResolverFactory {
             return null;
         }
 
+        protected static String getScriptFromContext(ExecutionEntity execution) {
+            FlowableListener currentListener = execution.getCurrentFlowableListener();
+            if (currentListener != null) {
+                return getScriptFromListener(currentListener);
+            }
+            if (execution.getCurrentFlowElement() instanceof ScriptTask scriptTask) {
+                return scriptTask.getScript();
+            }
+            return null;
+        }
+
+        protected static String getScriptFromListener(FlowableListener listener) {
+            List<FieldExtension> fieldExtensions = listener.getFieldExtensions();
+            if (fieldExtensions != null) {
+                for (FieldExtension field : fieldExtensions) {
+                    if ("script".equals(field.getFieldName())) {
+                        return field.getStringValue() != null ? field.getStringValue() : field.getExpression();
+                    }
+                }
+            }
+            return null;
+        }
+
         protected static String getFileName(ExecutionEntity execution) {
             String fileName = "";
             if (StringUtils.isNotEmpty(execution.getTenantId())) {
                 fileName = execution.getTenantId() + File.separator;
             }
-            return fileName + execution.getProcessDefinitionKey() + File.separator + execution.getCurrentActivityId() + getExtension(execution);
+            return fileName + execution.getProcessDefinitionKey() + File.separator + getBaseFileName(execution) + getExtension(execution);
+        }
+
+        private static String getBaseFileName(ExecutionEntity execution) {
+            FlowableListener currentListener = execution.getCurrentFlowableListener();
+            if (currentListener != null) {
+                return execution.getCurrentActivityId() + currentListener.getXmlRowNumber();
+            }
+            return execution.getCurrentActivityId();
         }
 
         private static String getExtension(ExecutionEntity execution) {
+            FlowableListener currentListener = execution.getCurrentFlowableListener();
+            if (currentListener != null) {
+                return getLanguageFromListener(currentListener);
+            }
             String extension = ".unrecognized";
             if (execution.getCurrentFlowElement() instanceof ScriptTask scriptTask) {
                 extension = "." + scriptTask.getScriptFormat();
             }
             return extension;
+        }
+
+        private static String getLanguageFromListener(FlowableListener listener) {
+            List<FieldExtension> fieldExtensions = listener.getFieldExtensions();
+            if (fieldExtensions != null) {
+                for (FieldExtension field : fieldExtensions) {
+                    if ("language".equals(field.getFieldName())) {
+                        String language = field.getStringValue();
+                        if (StringUtils.isNotEmpty(language)) {
+                            return "." + language;
+                        }
+                    }
+                }
+            }
+            return ".groovy";
         }
     }
 }
