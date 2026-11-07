@@ -10,7 +10,7 @@
     
     <receiveTask id="receiveTask">
       <extensionElements>
-        <flowable:executionListener id="testScriptListener" event="start" class="org.flowable.engine.impl.bpmn.listener.ScriptExecutionListener">
+        <flowable:executionListener event="start" class="org.flowable.engine.impl.bpmn.listener.ScriptExecutionListener">
           <flowable:field name="script">
             <flowable:string><![CDATA[execution.setVariable('testVariable', 'anyValue')]]></flowable:string>
           </flowable:field>
