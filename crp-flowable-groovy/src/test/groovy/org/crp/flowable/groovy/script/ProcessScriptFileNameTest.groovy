@@ -111,6 +111,20 @@ class ProcessScriptFileNameTest {
                 .content(Charset.defaultCharset()).isEqualTo('${1+1}')
     }
 
+    @Test
+    @Deployment(resources= 'org/crp/flowable/groovy/script/oneReceiveTaskWithScriptListener.bpmn20.xml')
+    void runReceiveTaskWithScriptListener(RuntimeService runtimeService) {
+        def processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey('receiveTaskWithScriptListenerProcess').start()
+
+        assertThat(processInstance)
+                .as('Basic execution side effects must be present.')
+                .isRunning()
+                .hasVariableWithValue('testVariable', 'anyValue')
+        assertThat(new File('src/test/groovy/bpmn/receiveTaskWithScriptListenerProcess/receiveTask13.groovy'))
+                .content(Charset.defaultCharset()).isEqualTo('execution.setVariable(\'testVariable\', \'anyValue\')')
+    }
+
     private static void setScriptDiffersStrategyTo(ProcessEngineConfiguration configuration, ScriptDiffersStrategy strategy) {
         def factories = configuration.scriptBindingsFactory.resolverFactories
         factories[factories.size() - 1] = new ProcessScriptFileNameResolverFactory(

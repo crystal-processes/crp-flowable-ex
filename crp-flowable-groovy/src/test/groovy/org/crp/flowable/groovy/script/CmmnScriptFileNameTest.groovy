@@ -86,6 +86,19 @@ class CmmnScriptFileNameTest {
         setScriptDiffersStrategyTo(configuration, ScriptDiffersStrategy.OVERRIDE)
     }
 
+    @Test
+    @CmmnDeployment(resources= 'org/crp/flowable/groovy/script/oneTaskWithExecutionListener.cmmn')
+    void runTaskWithExecutionListener(CmmnRuntimeService cmmnRuntimeService) {
+        def caseInstance = cmmnRuntimeService.createCaseInstanceBuilder()
+                .caseDefinitionKey('listenerCase').start()
+
+		assertThat(caseInstance)
+				.hasVariableWithValue('testVariable', 'testValue')
+
+        assertThat(new File('src/test/groovy/cmmn/myListenerPlanModel/taskWithListener13.groovy'))
+                .content(Charset.defaultCharset()).isEqualTo("caseInstance.setVariable('testVariable', 'testValue')")
+	}
+
     private static void setScriptDiffersStrategyTo(CmmnEngineConfiguration configuration, ScriptDiffersStrategy strategy) {
         def factories = configuration.scriptBindingsFactory.resolverFactories
         factories[factories.size() - 1] = new CmmnScriptFileNameResolverFactory(

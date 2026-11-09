@@ -4,17 +4,23 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.cmmn.engine.impl.persistence.entity.PlanItemInstanceEntity;
+import org.flowable.cmmn.engine.impl.repository.CaseDefinitionUtil;
+import org.flowable.cmmn.model.FlowableListener;
+import org.flowable.cmmn.model.HumanTask;
+import org.flowable.cmmn.model.PlanFragment;
 import org.flowable.cmmn.model.PlanItemDefinition;
 import org.flowable.cmmn.model.ScriptServiceTask;
 import org.flowable.common.engine.api.variable.VariableContainer;
 import org.flowable.common.engine.impl.AbstractEngineConfiguration;
 import org.flowable.common.engine.impl.scripting.Resolver;
 import org.flowable.common.engine.impl.scripting.ResolverFactory;
+import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * @author martin.grofcik
@@ -50,27 +56,91 @@ public class CmmnScriptFileNameResolverFactory implements ResolverFactory {
 
         protected String checkFile(VariableContainer variableContainer, String prefixPath, ScriptDiffersStrategy scriptDiffersStrategy) {
             if (variableContainer instanceof PlanItemInstanceEntity planItemInstance) {
-                String fileName = getFileName(planItemInstance);
-                File file = new File(prefixPath + fileName);
-                try {
-                    FileUtils.touch(file);
-                    String script = ((ScriptServiceTask) planItemInstance.getPlanItem().getPlanItemDefinition()).getScript();
-                    try (ByteArrayInputStream scriptInputStream = new ByteArrayInputStream(script.getBytes())) {
-                        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-                            if (!IOUtils.contentEquals(scriptInputStream, fileInputStream)) {
-                                handleContentDiffer(file, script, scriptDiffersStrategy);
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                return fileName;
-            }
+				return createScriptForScriptTask(prefixPath, scriptDiffersStrategy, planItemInstance);
+			}
+			if (variableContainer instanceof TaskEntity task) {
+				return createScriptForTask(prefixPath, scriptDiffersStrategy, task);
+			}
+
             return null;
         }
 
-        protected String getFileName(PlanItemInstanceEntity planItemInstance) {
+		private String createScriptForTask(String prefixPath, ScriptDiffersStrategy scriptDiffersStrategy, TaskEntity task) {
+			if (task.getEventHandlerId() != null) {
+			HumanTask humanTask = (HumanTask) CaseDefinitionUtil.getCase(
+					task.getScopeDefinitionId()
+			).getAllCaseElements().get(task.getTaskDefinitionKey());
+				Optional<FlowableListener> currentListener = humanTask.getTaskListeners().stream().filter(
+						listener -> task.getEventHandlerId().equals(listener.getId())
+				).findAny();
+				if (currentListener.isPresent()) {
+					String fileName = getFileName(task, humanTask, currentListener.get());
+					File file = new File(prefixPath + fileName);
+					try {
+						FileUtils.touch(file);
+						String script = currentListener.get().getScriptInfo().getScript();
+						try (ByteArrayInputStream scriptInputStream = new ByteArrayInputStream(script.getBytes())) {
+							try (FileInputStream fileInputStream = new FileInputStream(file)) {
+								if (!IOUtils.contentEquals(scriptInputStream, fileInputStream)) {
+									handleContentDiffer(file, script, scriptDiffersStrategy);
+								}
+							}
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+
+					return fileName;
+				}
+			}
+
+
+			return null;
+		}
+
+		private String getFileName(TaskEntity task, HumanTask humanTask, FlowableListener currentListener) {
+			String fileName = "";
+			if (StringUtils.isNotEmpty(task.getTenantId())) {
+				fileName = task.getTenantId() + File.separator;
+			}
+
+			StringBuilder className = new StringBuilder(humanTask.getId());
+
+			PlanFragment parent = humanTask.getParent();
+			while(parent != null) {
+				className.insert(0, parent.getId() + File.separator);
+				parent = parent.getParent();
+			}
+			return fileName + className + currentListener.getXmlRowNumber() + "." + getExtension(currentListener);
+		}
+
+		private String getExtension(FlowableListener listener) {
+			if (listener.getScriptInfo() != null) {
+				return listener.getScriptInfo().getLanguage();
+			}
+			return "groovy";
+		}
+
+		private String createScriptForScriptTask(String prefixPath, ScriptDiffersStrategy scriptDiffersStrategy, PlanItemInstanceEntity planItemInstance) {
+			String fileName = getFileName(planItemInstance);
+			File file = new File(prefixPath + fileName);
+			try {
+				FileUtils.touch(file);
+				String script = ((ScriptServiceTask) planItemInstance.getPlanItem().getPlanItemDefinition()).getScript();
+				try (ByteArrayInputStream scriptInputStream = new ByteArrayInputStream(script.getBytes())) {
+					try (FileInputStream fileInputStream = new FileInputStream(file)) {
+						if (!IOUtils.contentEquals(scriptInputStream, fileInputStream)) {
+							handleContentDiffer(file, script, scriptDiffersStrategy);
+						}
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return fileName;
+		}
+
+		protected String getFileName(PlanItemInstanceEntity planItemInstance) {
             String fileName = "";
             if (StringUtils.isNotEmpty(planItemInstance.getTenantId())) {
                 fileName = planItemInstance.getTenantId() + File.separator;
