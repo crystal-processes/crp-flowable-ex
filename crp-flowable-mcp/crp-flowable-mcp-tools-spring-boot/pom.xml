@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>crp-flowable-mcp-tools-spring-boot</artifactId>
+	<name>crp-flowable-mcp-tools-spring-boot</name>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
