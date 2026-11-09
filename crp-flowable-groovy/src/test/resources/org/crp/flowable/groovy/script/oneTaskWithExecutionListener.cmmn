@@ -11,9 +11,7 @@
             <humanTask id="taskWithListener" name="Task with listener">
                 <extensionElements>
                     <flowable:taskListener event="create" type='script'>
-                                        <flowable:script language="groovy">
-                                            caseInstance.setVariable('testVariable', 'testValue')
-                                        </flowable:script>
+                                        <flowable:script language="groovy">caseInstance.setVariable('testVariable', 'testValue')</flowable:script>
                     </flowable:taskListener>
                 </extensionElements>
             </humanTask>

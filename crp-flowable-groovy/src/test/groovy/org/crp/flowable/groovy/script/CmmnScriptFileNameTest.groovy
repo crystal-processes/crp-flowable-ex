@@ -95,8 +95,9 @@ class CmmnScriptFileNameTest {
 		assertThat(caseInstance)
 				.hasVariableWithValue('testVariable', 'testValue')
 
-        assertThat(new File('src/test/groovy/cmmn/listenerCase/taskWithListener1.groovy'))
-                .content(Charset.defaultCharset()).isEqualTo("""caseInstance.setVariable('testVariable', 'testValue')""")    }
+        assertThat(new File('src/test/groovy/cmmn/myListenerPlanModel/taskWithListener13.groovy'))
+                .content(Charset.defaultCharset()).isEqualTo("caseInstance.setVariable('testVariable', 'testValue')")
+	}
 
     private static void setScriptDiffersStrategyTo(CmmnEngineConfiguration configuration, ScriptDiffersStrategy strategy) {
         def factories = configuration.scriptBindingsFactory.resolverFactories
